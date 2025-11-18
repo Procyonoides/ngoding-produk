@@ -1,0 +1,29 @@
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Admin Dashboard</h2>
+    <button class="btn btn-danger" (click)="logout()">Logout</button>
+  </div>
+
+  <div class="row text-center">
+    <div class="col-md-6 mb-3">
+      <div class="card menu-card shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title mb-3">Kelola Produk</h4>
+          <p class="card-text">Lihat dan atur semua produk di sistem.</p>
+          <button class="btn btn-primary" (click)="goTo('product-list')">Buka Product List</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <div class="card menu-card shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title mb-3">Manajemen User</h4>
+          <p class="card-text">Kelola akun pengguna yang terdaftar.</p>
+          <button class="btn btn-success" (click)="goTo('user-management')">Buka User Management</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

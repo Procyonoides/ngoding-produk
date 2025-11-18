@@ -1,0 +1,167 @@
+<div class="container-fluid py-4 px-5 bg-light min-vh-100">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">Management User</h4>
+      <p class="text-muted mb-0">Lihat semua produk yang tersedia di inventaris.</p>
+    </div>
+    <button class="btn btn-outline-danger btn-sm" routerLink="/admin/admin-dashboard">Dashboard</button>
+    <button class="btn btn-outline-danger btn-sm" routerLink="/admin/product-list">Product List</button>
+    <button class="btn btn-warning text-white fw-semibold" data-bs-toggle="modal" data-bs-target="#tambahUserModal">
+      <i class="bi bi-plus-lg me-1"></i> Tambah User
+    </button>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+    <div class="flex-grow-1">
+      <input type="text" class="form-control" placeholder="Cari user..." />
+    </div>
+    <select class="form-select w-auto">
+      <option>Semua Status</option>
+      <option>Active</option>
+      <option>Nonaktif</option>
+    </select>
+    <button class="btn btn-outline-secondary">
+      <i class="bi bi-funnel"></i> Asc
+    </button>
+  </div>
+
+  <!-- user-management.component.html -->
+  <div class="container mt-4">
+    <h4>Daftar User</h4>
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-dark">
+        <tr>
+            <th>Nama User</th>
+            <th>No. Telepon</th>
+            <th>Tanggal Dibuat</th>
+            <th>Username</th>
+            <th>E-Mail</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let user of users">
+            <td>{{ user.name }}</td>
+            <td>{{ user.phone }}</td>
+            <td>{{ user.createdAt }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.username }}</td>
+            <td>
+                <span [ngClass]="{
+                    'badge bg-primary': user.role === 'admin',
+                    'badge bg-secondary': user.role === 'user'
+                }">
+                {{ user.role }}
+                </span>
+            </td>
+            <td>
+              <span [ngClass]="{
+                'text-success fw-bold': user.status === 'aktif',
+                'text-danger fw-bold': user.status === 'nonaktif'
+              }">
+                {{ user.status }}
+              </span>
+            </td>
+            <td></td>
+        </tr>
+        </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="tambahUserModal" tabindex="-1" aria-labelledby="tambahUserLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="tambahUserLabel">Tambah User</h5>
+                    <p class="description-text mb-0">Masukkan detail user untuk menambahkannya ke management user</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <form id="userForm" (ngSubmit)="addUser()">
+                    <!-- Upload Gambar -->
+                    <div class="row-gap">
+                        <div class="upload-area" onclick="document.getElementById('imageInput').click()">
+                            <div class="upload-icon">
+                                <i class="far fa-image"></i>
+                            </div>
+                            <div class="upload-text">Unggah Gambar</div>
+                        </div>
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    </div>
+
+                    <!-- Nama User & No Telphone -->
+                    <div class="row row-gap">
+                        <div class="col-md-6">
+                            <label for="namaUser" class="form-label">Nama User<span class="required">*</span></label>
+                            <input type="text" [(ngModel)]="form.name" name="name" class="form-control" id="namaUser" placeholder="Masukan nama produk" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="noTelphone" class="form-label">No Telphone<span class="required">*</span></label>
+                            <input type="text" [(ngModel)]="form.phone" name="phone" class="form-control" id="noTelphone" placeholder="Masukan nomor telepon" required>
+                        </div>
+                    </div>
+
+                    <!-- Username & Password -->
+                    <div class="row row-gap">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Username<span class="required">*</span></label>
+                            <input type="text" [(ngModel)]="form.username" name="username" class="form-control" id="username" placeholder="Username" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">Password<span class="required">*</span></label>
+                            <input type="password" [(ngModel)]="form.password" name="password" class="form-control" id="password" placeholder="Password" required>
+                        </div>
+                    </div>
+
+                    <!-- Role -->
+                    <div class="row-gap col-md-6">
+                        <label for="role" class="form-label">Pilih Role<span class="required">*</span></label>
+                        <select class="form-select" id="role" [(ngModel)]="form.role" name="role">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="row-gap">
+                        <label for="email" class="form-label">Email<span class="required">*</span></label>
+                        <input type="email" [(ngModel)]="form.email" name="email" class="form-control" id="email" placeholder="Masukan Email" required>
+                    </div>
+
+                    <!-- Status User -->
+                    <div class="row-gap">
+                        <label class="form-label">Status User</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" [(ngModel)]="form.status" name="status" type="checkbox" id="statusToggle" role="switch">
+                            <label class="form-check-label" for="statusToggle">
+                                <span id="statusLabel">{{ form.status ? 'Aktif' : 'Nonaktif' }}</span>
+                            </label>
+                        </div>
+                        <div class="status-note">
+                            Jika user telah lama tidak aktif anda bisa menonaktifkan status user secara manual
+                        </div>
+                    </div>
+                    <!-- Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-submit">Tambah ✓</button>
+                    </div>
+                </form>
+            </div>
+
+            
+        </div>
+    </div>
+</div>

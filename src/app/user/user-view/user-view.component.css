@@ -1,0 +1,18 @@
+.hero-section {
+  position: relative;
+  color: white;
+}
+
+.hero-overlay {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.card img {
+  height: 180px;
+  object-fit: cover;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  transition: 0.3s;
+}

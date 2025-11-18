@@ -1,0 +1,9 @@
+.table td, .table th {
+  vertical-align: middle;
+}
+.table thead th {
+  font-weight: 600;
+}
+.badge {
+  font-size: 0.8rem;
+}

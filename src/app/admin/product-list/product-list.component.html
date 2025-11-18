@@ -1,0 +1,112 @@
+<div class="container-fluid p-4 bg-white min-vh-100">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <img src="https://via.placeholder.com/100x40?text=LOGO" alt="Logo" />
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-outline-danger btn-sm" routerLink="/admin/admin-dashboard">Dashboard</button>
+      <button class="btn btn-outline-danger btn-sm" routerLink="/admin/user-management">User Management</button>
+      <button class="btn btn-outline-danger btn-sm" (click)="logout()">Logout</button>
+      <span class="fw-semibold text-secondary">{{ username }}</span>
+      <div class="rounded-circle bg-secondary" style="width:35px;height:35px;"></div>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <h5 class="fw-bold mb-1">Daftar Produk</h5>
+  <p class="text-muted mb-4">Lihat semua produk yang tersedia di inventaris.</p>
+
+  <!-- Filter Row -->
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <div class="input-group" style="max-width: 250px;">
+      <span class="input-group-text bg-white border-end-0">
+        <i class="bi bi-search"></i>
+      </span>
+      <input type="text" class="form-control border-start-0" placeholder="Cari produk" />
+    </div>
+
+    <select class="form-select" style="max-width: 200px;">
+      <option>Semua Kategori</option>
+      <option>Meja</option>
+      <option>Kursi</option>
+      <option>Lemari</option>
+    </select>
+
+    <select class="form-select" style="max-width: 200px;">
+      <option>Semua Status</option>
+      <option>Aktif</option>
+      <option>Menipis</option>
+      <option>Nonaktif</option>
+    </select>
+
+    <div class="ms-auto d-flex gap-2">
+      <button class="btn btn-outline-secondary">Perbarui Stok Produk</button>
+      <button class="btn text-white" style="background-color: #ff7b00;">+ Tambah Produk</button>
+    </div>
+  </div>
+
+  <!-- Sort -->
+  <div class="d-flex justify-content-end align-items-center mb-2 gap-2">
+    <label class="text-muted">Urutkan:</label>
+    <select class="form-select form-select-sm w-auto">
+      <option>Nama Produk</option>
+      <option>Stok</option>
+      <option>Harga</option>
+    </select>
+    <button class="btn btn-light btn-sm border"><i class="bi bi-arrow-down-up"></i> Asc</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive shadow-sm rounded-3">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Nama Produk</th>
+          <th>Kategori</th>
+          <th>Stok</th>
+          <th>Harga (Rp)</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of products">
+          <td>
+            <div class="d-flex align-items-center">
+              <img [src]="p.img" class="rounded me-2" style="width:45px;height:45px;" />
+              <span>{{ p.name }}</span>
+            </div>
+          </td>
+          <td>{{ p.category }}</td>
+          <td>{{ p.stock }}</td>
+          <td>{{ p.price | number:'1.0-0' }}</td>
+          <td>
+            <span class="badge rounded-pill px-3 py-2" [ngClass]="getStatusClass(p.status)">
+              {{ p.status }}
+            </span>
+          </td>
+          <td class="text-end text-orange fw-semibold" style="color:#ff7b00; cursor:pointer;">
+            Lihat Detail
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="text-muted small">Menampilkan <b>10</b> dari <b>52</b> Data</div>
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item disabled"><a class="page-link">&lt;</a></li>
+        <li class="page-item active"><a class="page-link" style="background-color:#ff7b00;border:none;">1</a></li>
+        <li class="page-item"><a class="page-link">2</a></li>
+        <li class="page-item"><a class="page-link">3</a></li>
+        <li class="page-item"><a class="page-link">...</a></li>
+        <li class="page-item"><a class="page-link">13</a></li>
+        <li class="page-item"><a class="page-link">&gt;</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>

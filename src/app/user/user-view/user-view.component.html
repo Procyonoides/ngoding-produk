@@ -1,0 +1,58 @@
+<div class="container-fluid px-5 py-3">
+  <!-- Navbar -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="logo">
+      <h3 class="fw-bold text-dark">LOGO</h3>
+    </div>
+    <div>
+      <span class="me-3 text-secondary">{{ name }}</span>
+      <button class="btn btn-outline-danger btn-sm" (click)="logout()">Logout</button>
+      
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="hero-section text-center mb-5 p-4 rounded" 
+       style="background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=60') center/cover no-repeat;">
+    <div class="hero-overlay p-5 text-white rounded">
+      <h2 class="fw-bold">Cari Funitur Impian</h2>
+      <p>Cari furniture mulai dari meja, lemari, hingga rak di sini</p>
+
+      <div class="d-flex justify-content-center mt-3">
+        <div class="input-group w-50">
+          <!-- <input type="text" class="form-control" placeholder="Cari produk" [(ngModel)]="searchQuery"> -->
+          <button class="btn btn-warning" (click)="searchProduct()">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rekomendasi Section -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="fw-bold">Rekomendasi</h4>
+      <p class="text-secondary mb-0">Produk - produk pilihan terbaik dari kami</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm">Lihat Semua Produk</button>
+  </div>
+
+  <!-- Product Cards -->
+  <div class="row g-4">
+    <div class="col-md-3 col-sm-6" *ngFor="let product of products">
+      <div class="card h-100 shadow-sm border-0">
+        <img [src]="product.image" class="card-img-top rounded-top" alt="{{ product.name }}">
+        <div class="card-body">
+          <h6 class="fw-bold">{{ product.name }}</h6>
+          <p class="text-muted small mb-1">{{ product.description }}</p>
+          <!-- <h6 class="text-danger fw-bold mb-1">Rp {{ product.price | number }}</h6> -->
+          <div class="d-flex justify-content-between align-items-center small text-secondary">
+            <span><i class="bi bi-star-fill text-warning"></i> {{ product.rating }}</span>
+            <span>{{ product.sold }} Terjual</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
