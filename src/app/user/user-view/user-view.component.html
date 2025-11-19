@@ -1,86 +1,112 @@
-<div class="container-fluid px-5 py-3">
-  <!-- Navbar -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="logo">
-      <h3 class="fw-bold text-dark">LOGO</h3>
-    </div>
-    <div class="d-flex align-items-center gap-3">
-      <span class="me-2 text-secondary">{{ name }}</span>
-      <button class="btn btn-outline-danger btn-sm" (click)="logout()">Logout</button>
-    </div>
-  </div>
+<!-- Hero Section with Transparent Navbar -->
+<div class="hero-wrapper">
+  <!-- Navbar Transparan -->
+  <app-navbar [isAdmin]="false" [transparent]="true"></app-navbar>
+  
+  <!-- Hero Content -->
+  <div class="hero-section-full">
+    <div class="hero-overlay">
+      <div class="container-fluid px-4">
+        <div class="hero-content text-center text-white">
+          <h1 class="hero-title fw-bold mb-3">Cari Funitur Impian</h1>
+          <p class="hero-subtitle mb-5">Cari furniture mulai dari meja, lemari, hingga rak di sini</p>
 
-  <!-- Hero Section -->
-  <div class="hero-section text-center mb-5 p-4 rounded" 
-       style="background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=60') center/cover no-repeat;">
-    <div class="hero-overlay p-5 text-white rounded">
-      <h2 class="fw-bold">Cari Funitur Impian</h2>
-      <p>Cari furniture mulai dari meja, lemari, hingga rak di sini</p>
-
-      <div class="d-flex justify-content-center mt-3">
-        <div class="input-group w-50">
-          <input type="text" class="form-control" placeholder="Cari produk" 
-                 [(ngModel)]="searchQuery" (keyup.enter)="searchProduct()">
-          <button class="btn btn-warning" (click)="searchProduct()">
-            <i class="bi bi-search"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
-
-  <!-- Error Message -->
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
-  </div>
-
-  <!-- Rekomendasi Section -->
-  <div class="d-flex justify-content-between align-items-center mb-3" *ngIf="!loading">
-    <div>
-      <h4 class="fw-bold">Rekomendasi</h4>
-      <p class="text-secondary mb-0">Produk - produk pilihan terbaik dari kami</p>
-    </div>
-    <button class="btn btn-outline-dark btn-sm" (click)="searchQuery = ''; searchProduct()">
-      Lihat Semua Produk
-    </button>
-  </div>
-
-  <!-- Product Cards -->
-  <div class="row g-4" *ngIf="!loading">
-    <div class="col-md-3 col-sm-6" *ngFor="let product of filteredProducts">
-      <div class="card h-100 shadow-sm border-0 cursor-pointer" 
-           (click)="viewProductDetail(product._id)"
-           style="cursor: pointer;">
-        <img [src]="product.imageUrl || 'https://via.placeholder.com/300x200'" 
-             class="card-img-top rounded-top" 
-             style="height: 180px; object-fit: cover;"
-             alt="{{ product.name }}">
-        <div class="card-body">
-          <h6 class="fw-bold text-truncate">{{ product.name }}</h6>
-          <p class="text-muted small mb-2 text-truncate">{{ product.description }}</p>
-          <h6 class="text-danger fw-bold mb-2">Rp {{ product.price | number:'1.0-0' }}</h6>
-          <div class="d-flex justify-content-between align-items-center small text-secondary">
-            <span><i class="bi bi-star-fill text-warning"></i> {{ product.rating || 0 }}</span>
-            <span>{{ product.sold || 0 }} Terjual</span>
+          <!-- Search Box -->
+          <div class="search-container mx-auto">
+            <div class="search-box-large">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" 
+                     class="form-control search-input" 
+                     placeholder="Cari produk" 
+                     [(ngModel)]="searchQuery" 
+                     (keyup.enter)="searchProduct()">
+              <button class="btn btn-search" (click)="searchProduct()">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- No Products Found -->
-    <div class="col-12 text-center py-5" *ngIf="filteredProducts.length === 0">
-      <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-      <p class="text-muted mt-3">Tidak ada produk yang ditemukan</p>
-      <button class="btn btn-primary" (click)="searchQuery = ''; searchProduct()">
-        Lihat Semua Produk
+<!-- Main Content -->
+<div class="content-wrapper">
+  <div class="container-fluid px-4 py-5">
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3 text-muted">Memuat produk...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-circle me-2"></i>
+      {{ errorMessage }}
+      <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+    </div>
+
+    <!-- Section Header -->
+    <div class="section-header d-flex justify-content-between align-items-center mb-4 fade-in px-5" 
+         *ngIf="!loading" 
+         style="animation-delay: 0.1s;">
+      <div>
+        <h4 class="fw-bold mb-1">Rekomendasi Produk</h4>
+        <p class="text-muted mb-0">Produk-produk pilihan terbaik dari kami</p>
+      </div>
+      <button class="btn btn-outline-dark" (click)="searchQuery = ''; searchProduct()">
+        <i class="bi bi-grid me-2"></i>
+        Lihat Semua
       </button>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="row g-4 fade-in px-5" *ngIf="!loading" style="animation-delay: 0.2s;">
+      <div class="col-lg-3 col-md-4 col-sm-6" *ngFor="let product of displayedProducts">
+        <div class="product-card card border-0 shadow-sm h-100" (click)="viewProductDetail(product._id)">
+          <div class="product-image-wrapper">
+            <img [src]="product.imageUrl || 'https://via.placeholder.com/300x200'" 
+                 class="card-img-top" 
+                 alt="{{ product.name }}">
+            <div class="product-badge" *ngIf="product.status === 'Menipis'">
+              <span class="badge bg-warning">Stok Terbatas</span>
+            </div>
+          </div>
+          <div class="card-body p-3">
+            <h6 class="product-title fw-bold mb-2 text-truncate">{{ product.name }}</h6>
+            <p class="product-description text-muted small mb-2 text-truncate">
+              {{ product.description }}
+            </p>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="product-price text-danger fw-bold mb-0">
+                Rp {{ product.price | number:'1.0-0' }}
+              </h5>
+            </div>
+            <div class="product-meta d-flex justify-content-between align-items-center small text-muted">
+              <span>
+                <i class="bi bi-star-fill text-warning me-1"></i>
+                {{ product.rating || 4.5 }}
+              </span>
+              <span>{{ product.sold || 0 }} Terjual</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Products Found -->
+      <div class="col-12 text-center py-5" *ngIf="filteredProducts.length === 0">
+        <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+        <h5 class="mt-3 text-muted">Tidak ada produk yang ditemukan</h5>
+        <p class="text-muted mb-3">Coba kata kunci lain atau lihat semua produk</p>
+        <button class="btn btn-primary px-5" (click)="searchQuery = ''; searchProduct()">
+          <i class="bi bi-grid me-2"></i>
+          Lihat Semua Produk
+        </button>
+      </div>
     </div>
   </div>
 </div>

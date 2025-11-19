@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../auth/auth.service';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { NavbarComponent } from '../../shared/navbar/navbar.component';
 
 interface Product {
   _id?: string;
@@ -22,26 +22,26 @@ interface Product {
 @Component({
   selector: 'app-user-view',
   standalone: true,
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './user-view.component.html',
   styleUrl: './user-view.component.css'
 })
-export class UserViewComponent {
-  name = '';
-  username = '';
-  role = '';
+export class UserViewComponent implements OnInit {
   searchQuery = '';
   products: Product[] = [];
   filteredProducts: Product[] = [];
+  displayedProducts: Product[] = [];
   loading = true;
   errorMessage = '';
 
-  constructor(private authService: AuthService, private router: Router, private http: HttpClient) {}
+  // ✅ Pagination
+  currentPage = 1;
+  itemsPerPage = 8;
+  totalPages = 0;
+
+  constructor(private router: Router, private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.username = this.authService.getUsername() || '';
-    this.name = this.authService.getName() || '';
-    this.role = this.authService.getRole() || '';
     this.loadProducts();
   }
 
@@ -49,9 +49,9 @@ export class UserViewComponent {
     this.loading = true;
     this.http.get<Product[]>('http://localhost:5000/api/products').subscribe({
       next: (res) => {
-        // Only show active products for users
         this.products = res.filter(p => p.status === 'Aktif' || p.status === 'Menipis');
         this.filteredProducts = [...this.products];
+        this.updatePagination();
         this.loading = false;
       },
       error: (err) => {
@@ -73,15 +73,69 @@ export class UserViewComponent {
     }
   }
 
+  // ✅ Pagination Methods
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.filteredProducts.length / this.itemsPerPage);
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.displayedProducts = this.filteredProducts.slice(startIndex, endIndex);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.goToPage(this.currentPage + 1);
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.goToPage(this.currentPage - 1);
+    }
+  }
+
+  getPaginationPages(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    
+    if (this.totalPages <= maxVisible) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (this.currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) pages.push(i);
+        pages.push(-1); // Ellipsis
+        pages.push(this.totalPages);
+      } else if (this.currentPage >= this.totalPages - 2) {
+        pages.push(1);
+        pages.push(-1); // Ellipsis
+        for (let i = this.totalPages - 3; i <= this.totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push(-1); // Ellipsis
+        pages.push(this.currentPage - 1);
+        pages.push(this.currentPage);
+        pages.push(this.currentPage + 1);
+        pages.push(-1); // Ellipsis
+        pages.push(this.totalPages);
+      }
+    }
+    
+    return pages;
+  }
+
   viewProductDetail(productId: string | undefined): void {
     if (productId) {
       this.router.navigate(['/user/product-detail', productId]);
     }
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
   }
 
 }

@@ -11,3 +11,7 @@
 h2 {
   font-weight: 600;
 }
+
+.bg-product {
+  background-color: var(--primary-orange-hover) !important;
+}
