@@ -10,7 +10,9 @@ import { FormsModule } from '@angular/forms';
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes), importProvidersFrom(FormsModule),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
-    provideHttpClient(withFetch()),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptor])
+    ),
   ],
 }).catch((err) => console.error(err));

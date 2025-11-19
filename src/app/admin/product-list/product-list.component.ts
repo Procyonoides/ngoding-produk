@@ -1,33 +1,303 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
 import { Router, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+
+declare var bootstrap: any;
+
+interface Product {
+  _id?: string;
+  name: string;
+  category: string;
+  description: string;
+  price: number;
+  stock: number;
+  unit: string;
+  status: string;
+  imageUrl: string;
+  rating?: number;
+  sold?: number;
+}
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css'
 })
 export class ProductListComponent {
   username = '';
   role = '';
+  products: Product[] = [];
+  filteredProducts: Product[] = [];
 
-  products = [
-    { name: 'Meja Makan Kayu Jati', category: 'Meja', stock: 2, price: 3400000, status: 'Menipis', img: 'https://via.placeholder.com/50' },
-    { name: 'Tempat Tidur Queen Size', category: 'Tempat Tidur', stock: 4, price: 6700000, status: 'Menipis', img: 'https://via.placeholder.com/50' },
-    { name: 'Lemari Baju', category: 'Lemari', stock: 8, price: 600000, status: 'Aktif', img: 'https://via.placeholder.com/50' },
-    { name: 'Kursi Ergonomis', category: 'Kursi', stock: 20, price: 300000, status: 'Aktif', img: 'https://via.placeholder.com/50' },
-    { name: 'Lemari Pakaian 3 Pintu', category: 'Lemari', stock: 15, price: 750000, status: 'Aktif', img: 'https://via.placeholder.com/50' },
-    { name: 'Rak Buku Minimalis', category: 'Rak', stock: 29, price: 800000, status: 'Aktif', img: 'https://via.placeholder.com/50' },
-    { name: 'Meja Belajar Anak', category: 'Meja', stock: 12, price: 1150000, status: 'Aktif', img: 'https://via.placeholder.com/50' },
-    { name: 'Kursi Cafe Kayu', category: 'Kursi', stock: 16, price: 780000, status: 'Aktif', img: 'https://via.placeholder.com/50' },
-    { name: 'Bufet TV Minimalis', category: 'Bufet', stock: 24, price: 2900000, status: 'Nonaktif', img: 'https://via.placeholder.com/50' },
-    { name: 'Meja Kerja Industrial', category: 'Meja', stock: 12, price: 2350000, status: 'Nonaktif', img: 'https://via.placeholder.com/50' },
-  ];
+  // Filter & Sort
+  searchQuery = '';
+  selectedCategory = 'Semua Kategori';
+  selectedStatus = 'Semua Status';
+  sortBy = 'name';
+  sortOrder = 'asc';
+  
+  categories = ['Semua Kategori', 'Meja', 'Kursi', 'Lemari', 'Rak', 'Bufet', 'Tempat Tidur'];
+  statuses = ['Semua Status', 'Aktif', 'Menipis', 'Nonaktif'];
+  units = ['Unit', 'Set', 'Pcs'];
+  
+  // Forms
+  productForm: Product = this.getEmptyProduct();
+  selectedProduct: Product | null = null;
+  stockUpdateForm = {
+    stock: 0,
+    operation: 'Penambahan'
+  };
 
-  getStatusClass(status: string) {
+  // Loading & Error
+  loading = false;
+  errorMessage = '';
+  successMessage = '';
+
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private http: HttpClient
+  ) {}
+
+  ngOnInit(): void {
+    this.username = this.authService.getUsername() || '';
+    this.role = this.authService.getRole() || '';
+    this.loadProducts();
+  }
+
+  getEmptyProduct(): Product {
+    return {
+      name: '',
+      category: 'Meja',
+      description: '',
+      price: 0,
+      stock: 0,
+      unit: 'Unit',
+      status: 'Aktif',
+      imageUrl: ''
+    };
+  }
+
+  // ✅ LOAD PRODUCTS
+  loadProducts(): void {
+    this.loading = true;
+    this.http.get<Product[]>('http://localhost:5000/api/products').subscribe({
+      next: (res) => {
+        this.products = res;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('❌ Error loading products:', err);
+        this.errorMessage = 'Gagal memuat produk';
+        this.loading = false;
+      }
+    });
+  }
+
+  // ✅ FILTER & SORT
+  applyFilters(): void {
+    let filtered = [...this.products];
+    
+    // Search
+    if (this.searchQuery) {
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
+    
+    // Category
+    if (this.selectedCategory !== 'Semua Kategori') {
+      filtered = filtered.filter(p => p.category === this.selectedCategory);
+    }
+    
+    // Status
+    if (this.selectedStatus !== 'Semua Status') {
+      filtered = filtered.filter(p => p.status === this.selectedStatus);
+    }
+    
+    // Sort
+    filtered.sort((a, b) => {
+      let aVal: any = a[this.sortBy as keyof Product];
+      let bVal: any = b[this.sortBy as keyof Product];
+      
+      if (typeof aVal === 'string') {
+        aVal = aVal.toLowerCase();
+        bVal = bVal.toLowerCase();
+      }
+      
+      if (this.sortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+    
+    this.filteredProducts = filtered;
+  }
+
+  onSearchChange(): void {
+    this.applyFilters();
+  }
+
+  onCategoryChange(): void {
+    this.applyFilters();
+  }
+
+  onStatusChange(): void {
+    this.applyFilters();
+  }
+
+  onSortChange(): void {
+    this.applyFilters();
+  }
+
+  toggleSortOrder(): void {
+    this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+    this.applyFilters();
+  }
+
+  // ✅ CREATE PRODUCT
+  openAddModal(): void {
+    this.productForm = this.getEmptyProduct();
+    this.errorMessage = '';
+    const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+    modal.show();
+  }
+
+  addProduct(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    
+    this.http.post('http://localhost:5000/api/products', this.productForm).subscribe({
+      next: (res: any) => {
+        this.successMessage = 'Produk berhasil ditambahkan!';
+        this.closeModal('addProductModal');
+        this.loadProducts();
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        console.error('❌ Error adding product:', err);
+        this.errorMessage = err.error?.message || 'Gagal menambahkan produk';
+        this.loading = false;
+      }
+    });
+  }
+
+  // ✅ VIEW DETAIL
+  viewDetail(product: Product): void {
+    this.selectedProduct = { ...product };
+    const modal = new bootstrap.Modal(document.getElementById('detailProductModal'));
+    modal.show();
+  }
+
+  // ✅ EDIT PRODUCT
+  openEditModal(product: Product): void {
+    this.selectedProduct = { ...product };
+    this.errorMessage = '';
+    const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+    modal.show();
+  }
+
+  updateProduct(): void {
+    if (!this.selectedProduct?._id) return;
+    
+    this.loading = true;
+    this.errorMessage = '';
+    
+    this.http.put(
+      `http://localhost:5000/api/products/${this.selectedProduct._id}`,
+      this.selectedProduct
+    ).subscribe({
+      next: (res: any) => {
+        this.successMessage = 'Produk berhasil diupdate!';
+        this.closeModal('editProductModal');
+        this.loadProducts();
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        console.error('❌ Error updating product:', err);
+        this.errorMessage = err.error?.message || 'Gagal mengupdate produk';
+        this.loading = false;
+      }
+    });
+  }
+
+  // ✅ UPDATE STOCK
+  openStockModal(product: Product): void {
+    this.selectedProduct = { ...product };
+    this.stockUpdateForm = {
+      stock: 0,
+      operation: 'Penambahan'
+    };
+    this.errorMessage = '';
+    const modal = new bootstrap.Modal(document.getElementById('updateStockModal'));
+    modal.show();
+  }
+
+  updateStock(): void {
+    if (!this.selectedProduct?._id) return;
+    
+    this.loading = true;
+    this.errorMessage = '';
+    
+    const payload = {
+      stock: this.stockUpdateForm.stock,
+      operation: this.stockUpdateForm.operation === 'Penambahan' ? 'add' : 'set'
+    };
+    
+    this.http.patch(
+      `http://localhost:5000/api/products/${this.selectedProduct._id}/stock`,
+      payload
+    ).subscribe({
+      next: (res: any) => {
+        this.successMessage = 'Stok berhasil diperbarui!';
+        this.closeModal('updateStockModal');
+        this.loadProducts();
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        console.error('❌ Error updating stock:', err);
+        this.errorMessage = err.error?.message || 'Gagal memperbarui stok';
+        this.loading = false;
+      }
+    });
+  }
+
+  // ✅ DELETE PRODUCT
+  openDeleteModal(product: Product): void {
+    this.selectedProduct = { ...product };
+    const modal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
+    modal.show();
+  }
+
+  deleteProduct(): void {
+    if (!this.selectedProduct?._id) return;
+    
+    this.loading = true;
+    
+    this.http.delete(`http://localhost:5000/api/products/${this.selectedProduct._id}`).subscribe({
+      next: (res: any) => {
+        this.successMessage = 'Produk berhasil dihapus!';
+        this.closeModal('deleteProductModal');
+        this.loadProducts();
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        console.error('❌ Error deleting product:', err);
+        this.errorMessage = 'Gagal menghapus produk';
+        this.loading = false;
+      }
+    });
+  }
+
+  // ✅ UTILITIES
+  getStatusClass(status: string): string {
     switch (status) {
       case 'Menipis': return 'bg-warning-subtle text-warning fw-semibold';
       case 'Aktif': return 'bg-success-subtle text-success fw-semibold';
@@ -36,14 +306,24 @@ export class ProductListComponent {
     }
   }
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
-
-  ngOnInit(): void {
-    this.username = this.authService.getUsername() || '';
-    this.role = this.authService.getRole() || '';
+  closeModal(modalId: string): void {
+    const modalElement = document.getElementById(modalId);
+    if (modalElement) {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    }
+    
+    // Remove backdrop
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+    
+    this.loading = false;
+    this.errorMessage = '';
   }
 
   logout(): void {

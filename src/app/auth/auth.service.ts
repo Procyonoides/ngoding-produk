@@ -11,6 +11,7 @@ export class AuthService {
   private tokenKey = 'token';
   private roleKey = 'role';
   private usernameKey = 'username';
+  private nameKey = 'name';
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -22,35 +23,29 @@ export class AuthService {
   login(username: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, { username, password }).pipe(
       tap(res => {
-        if (res?.token) {
+        if (res?.token && this.isBrowser()) {
+          // ✅ Simpan hanya data yang aman (TIDAK termasuk password)
           localStorage.setItem(this.tokenKey, res.token);
           localStorage.setItem(this.roleKey, res.role);
           localStorage.setItem(this.usernameKey, res.username ?? username);
+          
           if (res.name) {
-            localStorage.setItem('name', res.name);
+            localStorage.setItem(this.nameKey, res.name);
           }
         }
       })
     );
   }
-  
-  // login(username: string, password: string): Observable<any> {
-  //   return this.http.post<any>(`${this.apiUrl}/login`, { username, password }).pipe(
-  //     tap(res => {
-  //       if (res?.token) {
-  //         localStorage.setItem('token', res.token);
-  //         localStorage.setItem('role', res.role);
-  //         localStorage.setItem('username', res.username);
-  //       }
-  //     })
-  //   );
-  // }
-  
-  logout() {
+
+  logout(): void {
     if (this.isBrowser()) {
       localStorage.removeItem(this.tokenKey);
       localStorage.removeItem(this.roleKey);
       localStorage.removeItem(this.usernameKey);
+      localStorage.removeItem(this.nameKey);
+      
+      // ✅ Redirect ke login
+      this.router.navigate(['/login']);
     }
   }
   
@@ -70,22 +65,32 @@ export class AuthService {
     return localStorage.getItem('name');
   }
 
+  // ✅ Check login status
   isLoggedIn(): boolean {
     const token = this.getToken();
-    return !!token;
+    
+    // ✅ Bonus: Cek apakah token expired (opsional)
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expiry = payload.exp * 1000; // Convert to milliseconds
+        
+        if (Date.now() >= expiry) {
+          // Token expired, logout otomatis
+          this.logout();
+          return false;
+        }
+        
+        return true;
+      } catch (error) {
+        // Token invalid
+        this.logout();
+        return false;
+      }
+    }
+    
+    return false;
   }
-
-  // logout() {
-  //   localStorage.clear();
-  // }
-
-  // getRole(): string | null {
-  //   return localStorage.getItem('role');
-  // }
-
-  // isLoggedIn(): boolean {
-  //   return !!localStorage.getItem('token');
-  // }
   
   getAllUsers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/users`);

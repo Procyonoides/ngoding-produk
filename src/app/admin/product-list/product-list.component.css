@@ -1,9 +1,84 @@
 .table td, .table th {
   vertical-align: middle;
+  padding: 1rem;
 }
+
+.table thead {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
 .table thead th {
   font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  color: #495057;
 }
+
+.table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.005);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 .badge {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.text-orange {
+  color: var(--primary-orange);
+  transition: all 0.2s ease;
+}
+
+.text-orange:hover {
+  color: var(--primary-orange-hover);
+  text-decoration: underline;
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+}
+
+.dropdown-item {
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+  padding-left: 1.5rem;
+}
+
+.dropdown-item i {
+  width: 20px;
+}
+
+.form-control, .form-select {
+  transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 123, 0, 0.15);
+}
+
+img {
+  transition: transform 0.3s ease;
+}
+
+tr:hover img {
+  transform: scale(1.1);
 }

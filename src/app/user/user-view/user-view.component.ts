@@ -1,103 +1,87 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+
+interface Product {
+  _id?: string;
+  name: string;
+  category: string;
+  description: string;
+  price: number;
+  stock: number;
+  unit: string;
+  status: string;
+  imageUrl: string;
+  rating?: number;
+  sold?: number;
+}
 
 @Component({
   selector: 'app-user-view',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, CommonModule, FormsModule],
   templateUrl: './user-view.component.html',
   styleUrl: './user-view.component.css'
 })
 export class UserViewComponent {
-
   name = '';
   username = '';
   role = '';
   searchQuery = '';
+  products: Product[] = [];
+  filteredProducts: Product[] = [];
+  loading = true;
+  errorMessage = '';
 
-  products = [
-    {
-      name: 'Meja Makan Kayu Jati - Ukuran besar 100m²',
-      price: 3400000,
-      rating: 4.9,
-      sold: 121,
-      description: '',
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=60'
-    },
-    {
-      name: 'Sofa Minimalis - 3 Dudukan',
-      price: 5000000,
-      rating: 4.7,
-      sold: 75,
-      description: '',
-      image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=60'
-    },
-    {
-      name: 'Meja Kopi Kayu Palet - Vintage',
-      price: 900000,
-      rating: 4.6,
-      sold: 50,
-      description: '',
-      image: 'https://images.unsplash.com/photo-1578898887932-57c54b52e45e?auto=format&fit=crop&w=800&q=60'
-    },
-    {
-      name: 'Kursi Santai Rotan - Desain ergonomis',
-      price: 1200000,
-      rating: 4.8,
-      sold: 89,
-      description: '',
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=60'
-    },
-    {
-      name: 'Rak Dinding Modern - Minimalis',
-      price: 750000,
-      rating: 4.5,
-      sold: 30,
-      description: '',
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=60'
-    },
-    {
-      name: 'Lemari Pakaian Kayu - 2 Pintu',
-      price: 4200000,
-      rating: 4.4,
-      sold: 64,
-      description: '',
-      image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=60'
-    },
-    {
-      name: 'Lampu Hias Gantung - Retro',
-      price: 1500000,
-      rating: 4.4,
-      sold: 25,
-      description: '',
-      image: 'https://images.unsplash.com/photo-1616628182503-ffa3d9cc2cc9?auto=format&fit=crop&w=800&q=60'
-    },
-    {
-      name: 'Kursi Makan Kayu - Set 4',
-      price: 2600000,
-      rating: 4.8,
-      sold: 45,
-      description: '',
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=60'
-    }
-  ];
-
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.username = this.authService.getUsername() || '';
     this.name = this.authService.getName() || '';
     this.role = this.authService.getRole() || '';
+    this.loadProducts();
+  }
+
+  loadProducts(): void {
+    this.loading = true;
+    this.http.get<Product[]>('http://localhost:5000/api/products').subscribe({
+      next: (res) => {
+        // Only show active products for users
+        this.products = res.filter(p => p.status === 'Aktif' || p.status === 'Menipis');
+        this.filteredProducts = [...this.products];
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('❌ Error loading products:', err);
+        this.errorMessage = 'Gagal memuat produk';
+        this.loading = false;
+      }
+    });
+  }
+
+  searchProduct(): void {
+    if (this.searchQuery.trim() === '') {
+      this.filteredProducts = [...this.products];
+    } else {
+      this.filteredProducts = this.products.filter(p =>
+        p.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        p.category.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
+  }
+
+  viewProductDetail(productId: string | undefined): void {
+    if (productId) {
+      this.router.navigate(['/user/product-detail', productId]);
+    }
   }
 
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  searchProduct(): void {
-    console.log('Cari:', this.searchQuery);
   }
 
 }

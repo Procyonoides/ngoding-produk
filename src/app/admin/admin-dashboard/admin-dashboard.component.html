@@ -1,29 +1,153 @@
-<div class="container mt-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Admin Dashboard</h2>
-    <button class="btn btn-danger" (click)="logout()">Logout</button>
-  </div>
+<div class="dashboard-wrapper min-vh-100">
+  <div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-5 fade-in">
+      <div>
+        <h1 class="display-5 fw-bold mb-2">
+          <i class="bi bi-speedometer2 text-orange me-3"></i>
+          Admin Dashboard
+        </h1>
+        <p class="text-muted mb-0">Kelola produk dan pengguna sistem dengan mudah</p>
+      </div>
+      <button class="btn btn-outline-danger btn-lg" (click)="logout()">
+        <i class="bi bi-box-arrow-right me-2"></i>
+        Logout
+      </button>
+    </div>
 
-  <div class="row text-center">
-    <div class="col-md-6 mb-3">
-      <div class="card menu-card shadow-sm">
-        <div class="card-body">
-          <h4 class="card-title mb-3">Kelola Produk</h4>
-          <p class="card-text">Lihat dan atur semua produk di sistem.</p>
-          <button class="btn btn-primary" (click)="goTo('product-list')">Buka Product List</button>
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5 fade-in" style="animation-delay: 0.1s;">
+      <div class="col-md-4">
+        <div class="card stats-card border-0 shadow-sm h-100">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted mb-1">Total Produk</p>
+                <h2 class="fw-bold mb-0">52</h2>
+                <small class="text-success">
+                  <i class="bi bi-arrow-up"></i> +12% dari bulan lalu
+                </small>
+              </div>
+              <div class="icon-box bg-primary-light">
+                <i class="bi bi-box-seam text-primary fs-3"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card stats-card border-0 shadow-sm h-100">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted mb-1">Total User</p>
+                <h2 class="fw-bold mb-0">28</h2>
+                <small class="text-success">
+                  <i class="bi bi-arrow-up"></i> +5% dari bulan lalu
+                </small>
+              </div>
+              <div class="icon-box bg-success-light">
+                <i class="bi bi-people text-success fs-3"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card stats-card border-0 shadow-sm h-100">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted mb-1">Stok Menipis</p>
+                <h2 class="fw-bold mb-0 text-warning">8</h2>
+                <small class="text-warning">
+                  <i class="bi bi-exclamation-triangle"></i> Perlu perhatian
+                </small>
+              </div>
+              <div class="icon-box bg-warning-light">
+                <i class="bi bi-exclamation-triangle text-warning fs-3"></i>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-6 mb-3">
-      <div class="card menu-card shadow-sm">
-        <div class="card-body">
-          <h4 class="card-title mb-3">Manajemen User</h4>
-          <p class="card-text">Kelola akun pengguna yang terdaftar.</p>
-          <button class="btn btn-success" (click)="goTo('user-management')">Buka User Management</button>
+    <!-- Menu Cards -->
+    <div class="row g-4 text-center fade-in" style="animation-delay: 0.2s;">
+      <div class="col-md-6">
+        <div class="card menu-card border-0 shadow-sm h-100">
+          <div class="card-body p-5">
+            <div class="menu-icon mx-auto mb-4">
+              <i class="bi bi-box-seam fs-1 text-white"></i>
+            </div>
+            <h3 class="fw-bold mb-3">Kelola Produk</h3>
+            <p class="text-muted mb-4">
+              Lihat, tambah, edit, dan atur semua produk furniture di sistem inventaris Anda
+            </p>
+            <button class="btn btn-warning btn-lg px-5 text-white" (click)="goTo('product-list')">
+              <i class="bi bi-arrow-right-circle me-2"></i>
+              Buka Product List
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card menu-card border-0 shadow-sm h-100">
+          <div class="card-body p-5">
+            <div class="menu-icon bg-success mx-auto mb-4">
+              <i class="bi bi-people fs-1 text-white"></i>
+            </div>
+            <h3 class="fw-bold mb-3">Manajemen User</h3>
+            <p class="text-muted mb-4">
+              Kelola akun pengguna, atur hak akses, dan monitor aktivitas user di sistem
+            </p>
+            <button class="btn btn-success btn-lg px-5" (click)="goTo('user-management')">
+              <i class="bi bi-arrow-right-circle me-2"></i>
+              Buka User Management
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card border-0 shadow-sm mt-5 fade-in" style="animation-delay: 0.3s;">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-4">
+          <i class="bi bi-lightning-charge text-warning me-2"></i>
+          Quick Actions
+        </h5>
+        <div class="row g-3">
+          <div class="col-md-3 col-sm-6">
+            <button class="btn btn-outline-primary w-100" (click)="goTo('product-list')">
+              <i class="bi bi-plus-circle me-2"></i>
+              Tambah Produk
+            </button>
+          </div>
+          <div class="col-md-3 col-sm-6">
+            <button class="btn btn-outline-success w-100" (click)="goTo('user-management')">
+              <i class="bi bi-person-plus me-2"></i>
+              Tambah User
+            </button>
+          </div>
+          <div class="col-md-3 col-sm-6">
+            <button class="btn btn-outline-warning w-100" (click)="goTo('product-list')">
+              <i class="bi bi-arrow-repeat me-2"></i>
+              Update Stok
+            </button>
+          </div>
+          <div class="col-md-3 col-sm-6">
+            <button class="btn btn-outline-info w-100">
+              <i class="bi bi-file-earmark-text me-2"></i>
+              Lihat Laporan
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-
 </div>

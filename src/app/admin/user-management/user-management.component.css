@@ -1,28 +1,56 @@
 .table td, .table th {
   vertical-align: middle;
+  padding: 1rem;
+}
+
+.table thead {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .badge {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
 }
 
 .page-link {
   border: none;
   color: #333;
+  margin: 0 2px;
+  border-radius: 8px !important;
+  transition: all 0.3s ease;
+}
+
+.page-link:hover {
+  background-color: #e9ecef;
+  transform: translateY(-2px);
 }
 
 .page-item.active .page-link {
-  background-color: #ff6600;
-  border-radius: 8px;
+  background-color: var(--primary-orange);
+  box-shadow: 0 4px 12px rgba(255, 123, 0, 0.3);
 }
 
 .btn-warning {
-  background-color: #ff6600;
+  background-color: var(--primary-orange);
   border: none;
+  box-shadow: 0 4px 12px rgba(255, 123, 0, 0.3);
 }
 
 .btn-warning:hover {
-  background-color: #e65c00;
+  background-color: var(--primary-orange-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 123, 0, 0.4);
 }
 
 .modal-header {
@@ -129,3 +157,4 @@
     font-size: 0.85rem;
     margin-bottom: 1rem;
 }
+

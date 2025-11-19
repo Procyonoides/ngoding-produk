@@ -5,12 +5,22 @@
       <img src="https://via.placeholder.com/100x40?text=LOGO" alt="Logo" />
     </div>
     <div class="d-flex align-items-center gap-3">
-      <button class="btn btn-outline-danger btn-sm" routerLink="/admin/admin-dashboard">Dashboard</button>
-      <button class="btn btn-outline-danger btn-sm" routerLink="/admin/user-management">User Management</button>
+      <button class="btn btn-outline-secondary btn-sm" routerLink="/admin/admin-dashboard">Dashboard</button>
+      <button class="btn btn-outline-secondary btn-sm" routerLink="/admin/user-management">User Management</button>
       <button class="btn btn-outline-danger btn-sm" (click)="logout()">Logout</button>
       <span class="fw-semibold text-secondary">{{ username }}</span>
       <div class="rounded-circle bg-secondary" style="width:35px;height:35px;"></div>
     </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
   </div>
 
   <!-- Title -->
@@ -23,42 +33,53 @@
       <span class="input-group-text bg-white border-end-0">
         <i class="bi bi-search"></i>
       </span>
-      <input type="text" class="form-control border-start-0" placeholder="Cari produk" />
+      <input type="text" class="form-control border-start-0" placeholder="Cari produk" 
+             [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
     </div>
 
-    <select class="form-select" style="max-width: 200px;">
-      <option>Semua Kategori</option>
-      <option>Meja</option>
-      <option>Kursi</option>
-      <option>Lemari</option>
+    <select class="form-select" style="max-width: 200px;" 
+            [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
+      <option *ngFor="let cat of categories">{{ cat }}</option>
     </select>
 
-    <select class="form-select" style="max-width: 200px;">
-      <option>Semua Status</option>
-      <option>Aktif</option>
-      <option>Menipis</option>
-      <option>Nonaktif</option>
+    <select class="form-select" style="max-width: 200px;"
+            [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+      <option *ngFor="let stat of statuses">{{ stat }}</option>
     </select>
 
     <div class="ms-auto d-flex gap-2">
-      <button class="btn btn-outline-secondary">Perbarui Stok Produk</button>
-      <button class="btn text-white" style="background-color: #ff7b00;">+ Tambah Produk</button>
+      <button class="btn btn-outline-secondary" (click)="openStockModal(filteredProducts[0])">
+        Perbarui Stok Produk
+      </button>
+      <button class="btn text-white" style="background-color: #ff7b00;" (click)="openAddModal()">
+        + Tambah Produk
+      </button>
     </div>
   </div>
 
   <!-- Sort -->
   <div class="d-flex justify-content-end align-items-center mb-2 gap-2">
     <label class="text-muted">Urutkan:</label>
-    <select class="form-select form-select-sm w-auto">
-      <option>Nama Produk</option>
-      <option>Stok</option>
-      <option>Harga</option>
+    <select class="form-select form-select-sm w-auto" [(ngModel)]="sortBy" (change)="onSortChange()">
+      <option value="name">Nama Produk</option>
+      <option value="stock">Stok</option>
+      <option value="price">Harga</option>
+      <option value="category">Kategori</option>
     </select>
-    <button class="btn btn-light btn-sm border"><i class="bi bi-arrow-down-up"></i> Asc</button>
+    <button class="btn btn-light btn-sm border" (click)="toggleSortOrder()">
+      <i class="bi bi-arrow-down-up"></i> {{ sortOrder === 'asc' ? 'Asc' : 'Desc' }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
 
   <!-- Table -->
-  <div class="table-responsive shadow-sm rounded-3">
+  <div class="table-responsive shadow-sm rounded-3" *ngIf="!loading">
     <table class="table align-middle mb-0">
       <thead class="table-light">
         <tr>
@@ -68,26 +89,53 @@
           <th>Harga (Rp)</th>
           <th>Status</th>
           <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let p of products">
+        <tr *ngFor="let p of filteredProducts">
           <td>
             <div class="d-flex align-items-center">
-              <img [src]="p.img" class="rounded me-2" style="width:45px;height:45px;" />
+              <img [src]="p.imageUrl || 'https://via.placeholder.com/50'" 
+                   class="rounded me-2" style="width:45px;height:45px;object-fit:cover;" />
               <span>{{ p.name }}</span>
             </div>
           </td>
           <td>{{ p.category }}</td>
-          <td>{{ p.stock }}</td>
+          <td>{{ p.stock }} {{ p.unit }}</td>
           <td>{{ p.price | number:'1.0-0' }}</td>
           <td>
             <span class="badge rounded-pill px-3 py-2" [ngClass]="getStatusClass(p.status)">
               {{ p.status }}
             </span>
           </td>
-          <td class="text-end text-orange fw-semibold" style="color:#ff7b00; cursor:pointer;">
+          <td class="text-end text-orange fw-semibold" style="color:#ff7b00; cursor:pointer;"
+              (click)="viewDetail(p)">
             Lihat Detail
+          </td>
+          <td>
+            <div class="dropdown">
+              <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" (click)="openEditModal(p)">
+                  <i class="bi bi-pencil"></i> Edit
+                </a></li>
+                <li><a class="dropdown-item" (click)="openStockModal(p)">
+                  <i class="bi bi-box"></i> Update Stok
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" (click)="openDeleteModal(p)">
+                  <i class="bi bi-trash"></i> Hapus
+                </a></li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredProducts.length === 0">
+          <td colspan="7" class="text-center py-4 text-muted">
+            Tidak ada produk yang ditemukan
           </td>
         </tr>
       </tbody>
@@ -96,17 +144,319 @@
 
   <!-- Pagination -->
   <div class="d-flex justify-content-between align-items-center mt-3">
-    <div class="text-muted small">Menampilkan <b>10</b> dari <b>52</b> Data</div>
-    <nav>
-      <ul class="pagination pagination-sm mb-0">
-        <li class="page-item disabled"><a class="page-link">&lt;</a></li>
-        <li class="page-item active"><a class="page-link" style="background-color:#ff7b00;border:none;">1</a></li>
-        <li class="page-item"><a class="page-link">2</a></li>
-        <li class="page-item"><a class="page-link">3</a></li>
-        <li class="page-item"><a class="page-link">...</a></li>
-        <li class="page-item"><a class="page-link">13</a></li>
-        <li class="page-item"><a class="page-link">&gt;</a></li>
-      </ul>
-    </nav>
+    <div class="text-muted small">Menampilkan <b>{{ filteredProducts.length }}</b> dari <b>{{ products.length }}</b> Data</div>
+  </div>
+</div>
+
+<!-- ========== MODAL TAMBAH PRODUK ========== -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title">Tambah Produk</h5>
+          <p class="text-muted small mb-0">Masukkan detail produk untuk menambahkannya ke inventaris.</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        
+        <form (ngSubmit)="addProduct()">
+          <!-- Upload Gambar -->
+          <div class="mb-3">
+            <label class="form-label">Gambar Produk</label>
+            <input type="text" class="form-control" [(ngModel)]="productForm.imageUrl" 
+                   name="imageUrl" placeholder="URL gambar (opsional)">
+          </div>
+
+          <!-- Nama & Kategori -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Nama Produk <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="productForm.name" 
+                     name="name" placeholder="Masukan nama produk" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Kategori Produk <span class="text-danger">*</span></label>
+              <select class="form-select" [(ngModel)]="productForm.category" name="category" required>
+                <option value="Meja">Meja</option>
+                <option value="Kursi">Kursi</option>
+                <option value="Lemari">Lemari</option>
+                <option value="Rak">Rak</option>
+                <option value="Bufet">Bufet</option>
+                <option value="Tempat Tidur">Tempat Tidur</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Deskripsi -->
+          <div class="mb-3">
+            <label class="form-label">Deskripsi Produk <span class="text-danger">*</span></label>
+            <textarea class="form-control" rows="3" [(ngModel)]="productForm.description" 
+                      name="description" placeholder="Masukan deskripsi produk" required></textarea>
+          </div>
+
+          <!-- Harga & Stok -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Harga Satuan <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text">Rp</span>
+                <input type="number" class="form-control" [(ngModel)]="productForm.price" 
+                       name="price" placeholder="0" min="0" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Stok Awal <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="number" class="form-control" [(ngModel)]="productForm.stock" 
+                       name="stock" placeholder="0" min="0" required>
+                <select class="form-select" style="max-width: 100px;" 
+                        [(ngModel)]="productForm.unit" name="unit">
+                  <option *ngFor="let u of units">{{ u }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status (Auto by system, tapi bisa override) -->
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" 
+                     [checked]="productForm.status === 'Aktif'"
+                     (change)="productForm.status = productForm.status === 'Aktif' ? 'Nonaktif' : 'Aktif'">
+              <label class="form-check-label">
+                Status Produk: <strong>{{ productForm.status }}</strong>
+              </label>
+            </div>
+            <small class="text-muted">
+              Sistem akan otomatis mengubah status jika stok menipis/habis
+            </small>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn text-white" style="background-color: #ff7b00;" 
+                    [disabled]="loading">
+              {{ loading ? 'Menyimpan...' : 'Tambah ✓' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL DETAIL PRODUK ========== -->
+<div class="modal fade" id="detailProductModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detail Produk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedProduct">
+        <div class="row">
+          <div class="col-md-4">
+            <img [src]="selectedProduct.imageUrl || 'https://via.placeholder.com/300'" 
+                 class="img-fluid rounded" style="width:100%;height:auto;object-fit:cover;">
+          </div>
+          <div class="col-md-8">
+            <h5 class="fw-bold">{{ selectedProduct.name }}</h5>
+            <p class="text-muted">{{ selectedProduct.description }}</p>
+            
+            <table class="table table-borderless">
+              <tr>
+                <td width="40%">Kategori</td>
+                <td><strong>{{ selectedProduct.category }}</strong></td>
+              </tr>
+              <tr>
+                <td>Harga Satuan</td>
+                <td><strong>Rp {{ selectedProduct.price | number:'1.0-0' }}</strong></td>
+              </tr>
+              <tr>
+                <td>Stok Saat Ini</td>
+                <td><strong>{{ selectedProduct.stock }} {{ selectedProduct.unit }}</strong></td>
+              </tr>
+              <tr>
+                <td>Status Produk</td>
+                <td>
+                  <span class="badge" [ngClass]="getStatusClass(selectedProduct.status)">
+                    {{ selectedProduct.status }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn text-white" style="background-color: #ff7b00;" 
+                (click)="closeModal('detailProductModal'); openEditModal(selectedProduct!)">
+          <i class="bi bi-pencil"></i> Edit Produk
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL EDIT PRODUK ========== -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Produk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedProduct">
+        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        
+        <form (ngSubmit)="updateProduct()">
+          <div class="mb-3">
+            <label class="form-label">Gambar Produk</label>
+            <input type="text" class="form-control" [(ngModel)]="selectedProduct.imageUrl" 
+                   name="imageUrl" placeholder="URL gambar">
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Nama Produk <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="selectedProduct.name" 
+                     name="name" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Kategori <span class="text-danger">*</span></label>
+              <select class="form-select" [(ngModel)]="selectedProduct.category" name="category" required>
+                <option value="Meja">Meja</option>
+                <option value="Kursi">Kursi</option>
+                <option value="Lemari">Lemari</option>
+                <option value="Rak">Rak</option>
+                <option value="Bufet">Bufet</option>
+                <option value="Tempat Tidur">Tempat Tidur</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Deskripsi <span class="text-danger">*</span></label>
+            <textarea class="form-control" rows="3" [(ngModel)]="selectedProduct.description" 
+                      name="description" required></textarea>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Harga Satuan <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text">Rp</span>
+                <input type="number" class="form-control" [(ngModel)]="selectedProduct.price" 
+                       name="price" min="0" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Unit</label>
+              <select class="form-select" [(ngModel)]="selectedProduct.unit" name="unit">
+                <option *ngFor="let u of units">{{ u }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn text-white" style="background-color: #ff7b00;" 
+                    [disabled]="loading">
+              {{ loading ? 'Menyimpan...' : 'Update ✓' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL UPDATE STOK ========== -->
+<div class="modal fade" id="updateStockModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title">Perbarui Stok</h5>
+          <p class="text-muted small mb-0" *ngIf="selectedProduct">
+            {{ selectedProduct.name }}
+          </p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedProduct">
+        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        
+        <div class="mb-3">
+          <label class="form-label">Stok Saat Ini</label>
+          <input type="text" class="form-control" [value]="selectedProduct.stock + ' ' + selectedProduct.unit" 
+                 readonly>
+        </div>
+
+        <form (ngSubmit)="updateStock()">
+          <div class="mb-3">
+            <label class="form-label">Tipe Update <span class="text-danger">*</span></label>
+            <select class="form-select" [(ngModel)]="stockUpdateForm.operation" name="operation" required>
+              <option value="Penambahan">Penambahan</option>
+              <option value="Pengurangan">Pengurangan (Set Manual)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Jumlah <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input type="number" class="form-control" [(ngModel)]="stockUpdateForm.stock" 
+                     name="stock" min="0" required placeholder="0">
+              <span class="input-group-text">{{ selectedProduct.unit }}</span>
+            </div>
+            <small class="text-muted" *ngIf="stockUpdateForm.operation === 'Penambahan'">
+              Stok baru: {{ selectedProduct.stock + stockUpdateForm.stock }} {{ selectedProduct.unit }}
+            </small>
+            <small class="text-muted" *ngIf="stockUpdateForm.operation === 'Pengurangan'">
+              Stok akan di-set menjadi: {{ stockUpdateForm.stock }} {{ selectedProduct.unit }}
+            </small>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn text-white" style="background-color: #ff7b00;" 
+                    [disabled]="loading">
+              {{ loading ? 'Memperbarui...' : 'Update ✓' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL DELETE PRODUK ========== -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle"></i> Hapus Produk
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedProduct">
+        <p>Apakah Anda yakin ingin menghapus produk ini?</p>
+        <div class="alert alert-warning">
+          <strong>{{ selectedProduct.name }}</strong><br>
+          <small>Produk akan dinonaktifkan dan stok diubah menjadi 0</small>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-danger" (click)="deleteProduct()" [disabled]="loading">
+          {{ loading ? 'Menghapus...' : 'Ya, Hapus' }}
+        </button>
+      </div>
+    </div>
   </div>
 </div>

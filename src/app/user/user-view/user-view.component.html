@@ -4,10 +4,9 @@
     <div class="logo">
       <h3 class="fw-bold text-dark">LOGO</h3>
     </div>
-    <div>
-      <span class="me-3 text-secondary">{{ name }}</span>
+    <div class="d-flex align-items-center gap-3">
+      <span class="me-2 text-secondary">{{ name }}</span>
       <button class="btn btn-outline-danger btn-sm" (click)="logout()">Logout</button>
-      
     </div>
   </div>
 
@@ -20,7 +19,8 @@
 
       <div class="d-flex justify-content-center mt-3">
         <div class="input-group w-50">
-          <!-- <input type="text" class="form-control" placeholder="Cari produk" [(ngModel)]="searchQuery"> -->
+          <input type="text" class="form-control" placeholder="Cari produk" 
+                 [(ngModel)]="searchQuery" (keyup.enter)="searchProduct()">
           <button class="btn btn-warning" (click)="searchProduct()">
             <i class="bi bi-search"></i>
           </button>
@@ -29,30 +29,58 @@
     </div>
   </div>
 
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
   <!-- Rekomendasi Section -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="d-flex justify-content-between align-items-center mb-3" *ngIf="!loading">
     <div>
       <h4 class="fw-bold">Rekomendasi</h4>
       <p class="text-secondary mb-0">Produk - produk pilihan terbaik dari kami</p>
     </div>
-    <button class="btn btn-outline-dark btn-sm">Lihat Semua Produk</button>
+    <button class="btn btn-outline-dark btn-sm" (click)="searchQuery = ''; searchProduct()">
+      Lihat Semua Produk
+    </button>
   </div>
 
   <!-- Product Cards -->
-  <div class="row g-4">
-    <div class="col-md-3 col-sm-6" *ngFor="let product of products">
-      <div class="card h-100 shadow-sm border-0">
-        <img [src]="product.image" class="card-img-top rounded-top" alt="{{ product.name }}">
+  <div class="row g-4" *ngIf="!loading">
+    <div class="col-md-3 col-sm-6" *ngFor="let product of filteredProducts">
+      <div class="card h-100 shadow-sm border-0 cursor-pointer" 
+           (click)="viewProductDetail(product._id)"
+           style="cursor: pointer;">
+        <img [src]="product.imageUrl || 'https://via.placeholder.com/300x200'" 
+             class="card-img-top rounded-top" 
+             style="height: 180px; object-fit: cover;"
+             alt="{{ product.name }}">
         <div class="card-body">
-          <h6 class="fw-bold">{{ product.name }}</h6>
-          <p class="text-muted small mb-1">{{ product.description }}</p>
-          <!-- <h6 class="text-danger fw-bold mb-1">Rp {{ product.price | number }}</h6> -->
+          <h6 class="fw-bold text-truncate">{{ product.name }}</h6>
+          <p class="text-muted small mb-2 text-truncate">{{ product.description }}</p>
+          <h6 class="text-danger fw-bold mb-2">Rp {{ product.price | number:'1.0-0' }}</h6>
           <div class="d-flex justify-content-between align-items-center small text-secondary">
-            <span><i class="bi bi-star-fill text-warning"></i> {{ product.rating }}</span>
-            <span>{{ product.sold }} Terjual</span>
+            <span><i class="bi bi-star-fill text-warning"></i> {{ product.rating || 0 }}</span>
+            <span>{{ product.sold || 0 }} Terjual</span>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- No Products Found -->
+    <div class="col-12 text-center py-5" *ngIf="filteredProducts.length === 0">
+      <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+      <p class="text-muted mt-3">Tidak ada produk yang ditemukan</p>
+      <button class="btn btn-primary" (click)="searchQuery = ''; searchProduct()">
+        Lihat Semua Produk
+      </button>
     </div>
   </div>
 </div>

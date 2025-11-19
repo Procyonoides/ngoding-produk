@@ -1,1 +1,219 @@
-<p>product-detail works!</p>
+<div class="container-fluid px-5 py-3 bg-light min-vh-100">
+  <!-- Navbar -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="logo">
+      <h3 class="fw-bold text-dark">LOGO</h3>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </button>
+      <span class="me-2 text-secondary">{{ name }}</span>
+      <button class="btn btn-outline-danger btn-sm" (click)="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Memuat detail produk...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !loading" class="alert alert-danger text-center">
+    {{ errorMessage }}
+    <button class="btn btn-primary mt-3" (click)="goBack()">Kembali ke Beranda</button>
+  </div>
+
+  <!-- Product Detail -->
+  <div *ngIf="product && !loading" class="bg-white rounded shadow-sm p-4 mb-4">
+    <div class="row">
+      <!-- Image Gallery -->
+      <div class="col-md-5">
+        <div class="mb-3">
+          <img [src]="selectedImage" class="img-fluid rounded w-100" 
+               style="height: 400px; object-fit: cover;" 
+               alt="{{ product.name }}">
+        </div>
+        
+        <!-- Thumbnail Gallery -->
+        <div class="d-flex gap-2 justify-content-start">
+          <img *ngFor="let img of imageGallery" 
+               [src]="img" 
+               class="img-thumbnail cursor-pointer" 
+               style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
+               [class.border-primary]="img === selectedImage"
+               (click)="selectImage(img)"
+               alt="Thumbnail">
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="col-md-7">
+        <div class="mb-3">
+          <h2 class="fw-bold mb-2">{{ product.name }}</h2>
+          
+          <!-- Rating & Sold -->
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="d-flex align-items-center">
+              <span class="text-warning me-1">
+                <i *ngFor="let star of getStarArray()" 
+                   [class]="star === 1 ? 'bi bi-star-fill' : 'bi bi-star'"></i>
+                <i *ngIf="getHalfStar()" class="bi bi-star-half"></i>
+              </span>
+              <span class="fw-bold me-1">{{ product.rating || 0 }}</span>
+              <span class="text-muted small">({{ product.sold || 0 }} Terjual)</span>
+            </div>
+          </div>
+
+          <!-- Price -->
+          <div class="mb-3">
+            <h3 class="text-danger fw-bold mb-0">
+              Rp {{ product.price | number:'1.0-0' }}
+            </h3>
+            <small class="text-muted">per {{ product.unit }}</small>
+          </div>
+
+          <!-- Delivery Info -->
+          <div class="alert alert-info d-flex align-items-center mb-3">
+            <i class="bi bi-truck me-2"></i>
+            <div>
+              <strong>Pengiriman</strong><br>
+              <small>Gratis Ongkir s/d Rp10.000 - Dapatkan Voucher s/d Rp10.000 jika pesanan terlambat</small>
+            </div>
+          </div>
+
+          <!-- Quantity & Stock -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Kuantitas</label>
+            <div class="d-flex align-items-center gap-3">
+              <div class="input-group" style="max-width: 150px;">
+                <button class="btn btn-outline-secondary" type="button" 
+                        (click)="decreaseQuantity()" [disabled]="quantity <= 1">
+                  <i class="bi bi-dash"></i>
+                </button>
+                <input type="text" class="form-control text-center" 
+                       [value]="quantity" readonly>
+                <button class="btn btn-outline-secondary" type="button" 
+                        (click)="increaseQuantity()" 
+                        [disabled]="!isInStock() || quantity >= product.stock">
+                  <i class="bi bi-plus"></i>
+                </button>
+              </div>
+              <span class="fw-semibold" [ngClass]="getStockClass()">
+                {{ getStockStatus() }}
+              </span>
+              <span class="text-muted small" *ngIf="isInStock()">
+                Stok: {{ product.stock }} {{ product.unit }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2 mb-3">
+            <button class="btn btn-warning text-white fw-semibold flex-grow-1" 
+                    (click)="buyNow()" 
+                    [disabled]="!isInStock()">
+              <i class="bi bi-cart-fill me-2"></i>
+              {{ isInStock() ? 'Beli Produk' : 'Stok Habis' }}
+            </button>
+          </div>
+
+          <!-- Total Price -->
+          <div class="alert alert-light border" *ngIf="isInStock()">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">Total Harga:</span>
+              <span class="h4 text-danger fw-bold mb-0">
+                Rp {{ getTotalPrice() | number:'1.0-0' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deskripsi Produk -->
+    <div class="mt-4 pt-4 border-top">
+      <h5 class="fw-bold mb-3">Deskripsi Produk</h5>
+      <p class="text-secondary" style="line-height: 1.8;">{{ product.description }}</p>
+
+      <!-- Spesifikasi -->
+      <div class="mt-4">
+        <h6 class="fw-bold mb-3">Spesifikasi Produk:</h6>
+        <table class="table table-borderless">
+          <tbody>
+            <tr>
+              <td width="200" class="text-muted">Kategori</td>
+              <td class="fw-semibold">{{ product.category }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">Status</td>
+              <td>
+                <span class="badge bg-success" *ngIf="product.status === 'Aktif'">{{ product.status }}</span>
+                <span class="badge bg-warning" *ngIf="product.status === 'Menipis'">{{ product.status }}</span>
+                <span class="badge bg-secondary" *ngIf="product.status === 'Nonaktif'">{{ product.status }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-muted">Stok Tersedia</td>
+              <td class="fw-semibold">{{ product.stock }} {{ product.unit }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Kelebihan Produk -->
+      <div class="mt-4">
+        <h6 class="fw-bold mb-3">Kelebihan Produk:</h6>
+        <ul class="list-unstyled">
+          <li class="mb-2">
+            <i class="bi bi-check-circle-fill text-success me-2"></i>
+            Material premium, awet hingga puluhan tahun
+          </li>
+          <li class="mb-2">
+            <i class="bi bi-check-circle-fill text-success me-2"></i>
+            Desain elegan dan mewah
+          </li>
+          <li class="mb-2">
+            <i class="bi bi-check-circle-fill text-success me-2"></i>
+            Cocok untuk rumah, villa, atau restoran besar
+          </li>
+          <li class="mb-2">
+            <i class="bi bi-check-circle-fill text-success me-2"></i>
+            Permukaan meja luas dan mudah dibersihkan
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  <div *ngIf="relatedProducts.length > 0 && !loading" class="mt-5">
+    <h5 class="fw-bold mb-4">Produk Terkait</h5>
+    <div class="row g-4">
+      <div class="col-md-3 col-sm-6" *ngFor="let related of relatedProducts">
+        <div class="card h-100 shadow-sm border-0 cursor-pointer" 
+             (click)="viewProduct(related._id)"
+             style="cursor: pointer;">
+          <img [src]="related.imageUrl || 'https://via.placeholder.com/300x200'" 
+               class="card-img-top" 
+               style="height: 200px; object-fit: cover;" 
+               alt="{{ related.name }}">
+          <div class="card-body">
+            <h6 class="fw-bold text-truncate">{{ related.name }}</h6>
+            <p class="text-muted small mb-2 text-truncate">{{ related.description }}</p>
+            <h6 class="text-danger fw-bold mb-2">Rp {{ related.price | number:'1.0-0' }}</h6>
+            <div class="d-flex justify-content-between align-items-center small text-secondary">
+              <span>
+                <i class="bi bi-star-fill text-warning"></i> {{ related.rating || 0 }}
+              </span>
+              <span>{{ related.sold || 0 }} Terjual</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
