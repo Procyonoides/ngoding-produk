@@ -6,6 +6,40 @@
         <h2 class="logo-text mb-0">LOGO</h2>
       </div>
 
+      <!-- ✅ Menu Navigasi (untuk Admin) -->
+      <div class="navbar-menu" *ngIf="isAdmin">
+        <a class="nav-link-custom" 
+           routerLink="/admin/admin-dashboard" 
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact: true}">
+          <i class="bi bi-speedometer2 me-2"></i>
+          Dashboard
+        </a>
+        <a class="nav-link-custom" 
+           routerLink="/admin/product-list" 
+           routerLinkActive="active">
+          <i class="bi bi-box-seam me-2"></i>
+          Produk
+        </a>
+        <a class="nav-link-custom" 
+           routerLink="/admin/user-management" 
+           routerLinkActive="active">
+          <i class="bi bi-people me-2"></i>
+          User
+        </a>
+      </div>
+
+      <!-- ✅ Menu Navigasi (untuk User) - opsional -->
+      <div class="navbar-menu" *ngIf="!isAdmin">
+        <a class="nav-link-custom" 
+           routerLink="/user/user-view" 
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact: true}">
+          <i class="bi bi-house me-2"></i>
+          Beranda
+        </a>
+      </div>
+
       <!-- User Menu -->
       <div class="user-menu position-relative">
         <div class="user-trigger d-flex align-items-center gap-2" (click)="toggleDropdown()">
@@ -38,6 +72,38 @@
           </div>
         </div>
       </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle d-md-none" 
+                *ngIf="isAdmin" 
+                (click)="toggleMobileMenu()">
+            <i class="bi" [ngClass]="showMobileMenu ? 'bi-x' : 'bi-list'"></i>
+        </button>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" [class.show]="showMobileMenu" *ngIf="isAdmin">
+            <a class="mobile-nav-link" 
+                routerLink="/admin/admin-dashboard" 
+                routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-speedometer2 me-2"></i>
+                Dashboard
+            </a>
+            <a class="mobile-nav-link" 
+                routerLink="/admin/product-list" 
+                routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-box-seam me-2"></i>
+                Produk
+            </a>
+            <a class="mobile-nav-link" 
+                routerLink="/admin/user-management" 
+                routerLinkActive="active"
+                (click)="closeMobileMenu()">
+                <i class="bi bi-people me-2"></i>
+                User
+            </a>
+        </div>
     </div>
   </div>
 

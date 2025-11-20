@@ -15,7 +15,7 @@
   color: #495057;
 }
 
-.table tbody tr {
+/* .table tbody tr {
   transition: all 0.2s ease;
 }
 
@@ -23,7 +23,7 @@
   background-color: #f8f9fa;
   transform: scale(1.005);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
+} */
 
 .badge {
   font-size: 0.85rem;
@@ -66,6 +66,123 @@
   width: 20px;
 }
 
+/* .form-control, .form-select {
+  transition: all 0.3s ease;
+} */
+
+.form-control:focus, .form-select:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 123, 0, 0.15);
+}
+
+img {
+  transition: transform 0.3s ease;
+}
+
+tr:hover img {
+  transform: scale(1.1);
+}
+
+/* ✅ Dropdown Custom Styling - SAMA SEPERTI USER MANAGEMENT */
+.dropdown-custom {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu-custom {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1050;
+  min-width: 200px;
+  padding: 0.5rem 0;
+  margin: 0.25rem 0 0;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: none;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+.dropdown-menu-custom.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-item-custom {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  clear: both;
+  font-weight: 400;
+  color: #212529;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item-custom:hover {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+.dropdown-item-custom i {
+  width: 20px;
+  text-align: center;
+}
+
+.dropdown-item-custom.text-danger {
+  color: #dc3545 !important;
+}
+
+.dropdown-item-custom.text-danger:hover {
+  background-color: #fff5f5;
+  color: #dc3545 !important;
+}
+
+.dropdown-divider-custom {
+  height: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Overlay for closing dropdown */
+.dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1040;
+  background: transparent;
+}
+
+/* ✅ Pastikan table cell tidak overflow hidden */
+.table td {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* ✅ Pastikan table-responsive tidak memotong dropdown */
+.table-responsive {
+  overflow: visible !important;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+/* Existing styles below... */
 .form-control, .form-select {
   transition: all 0.3s ease;
 }

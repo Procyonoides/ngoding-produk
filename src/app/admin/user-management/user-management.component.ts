@@ -1,16 +1,17 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { NavbarComponent } from '../../shared/navbar/navbar.component';
 
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule],
+  imports: [RouterModule, CommonModule, FormsModule, NavbarComponent],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.css'
 })
@@ -20,6 +21,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   loading = true;
   error = '';
   dtTrigger: Subject<any> = new Subject<any>();
+  openDropdownId: string | null = null;
 
   form = {
     name: '',
@@ -43,12 +45,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     };
   }
 
-  // onStatusChange() {
-  //   // Handle status change jika perlu
-  //   console.log('Status:', this.isActive ? 'Aktif' : 'Nonaktif');
-  // }
-
-  // constructor(private authService: AuthService) {}
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -71,20 +67,49 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.dtTrigger.unsubscribe();
   }
 
-  // ngAfterViewInit() {
-  //   const toggle = document.getElementById('statusToggle') as HTMLInputElement;
-  //   const statusLabel = document.getElementById('statusLabel') as HTMLElement;
-    
-  //   if (toggle) {
-  //     toggle.addEventListener('change', function() {
-  //       if (this.checked) {
-  //         statusLabel.textContent = 'Aktif';
-  //       } else {
-  //         statusLabel.textContent = 'Nonaktif';
-  //       }
-  //     });
-  //   }
-  // }
+  // ✅ Dropdown Toggle
+  toggleDropdown(userId: string): void {
+    this.openDropdownId = this.openDropdownId === userId ? null : userId;
+  }
+
+  closeDropdown(): void {
+    this.openDropdownId = null;
+  }
+
+  // ✅ Edit User
+  editUser(user: any): void {
+    console.log('Edit user:', user);
+    this.closeDropdown();
+    // TODO: Implement edit user logic
+  }
+
+  // ✅ Reset Password
+  resetPassword(user: any): void {
+    console.log('Reset password untuk:', user.username);
+    this.closeDropdown();
+    if (confirm(`Apakah Anda yakin ingin reset password untuk ${user.name}?`)) {
+      // TODO: Implement reset password logic
+      alert('Password direset. User akan menerima password baru via email.');
+    }
+  }
+
+  // ✅ Delete User
+  deleteUser(user: any): void {
+    this.closeDropdown();
+    if (confirm(`Apakah Anda yakin ingin menghapus user ${user.name}?`)) {
+      this.http.delete(`http://localhost:5000/api/auth/users/${user._id}`).subscribe({
+        next: (res: any) => {
+          console.log('✅ User berhasil dihapus');
+          alert('User berhasil dihapus');
+          this.getUsers();
+        },
+        error: (err) => {
+          console.error('❌ Gagal menghapus user:', err);
+          alert('Gagal menghapus user');
+        }
+      });
+    }
+  }
 
   addUser() {
     const payload = {

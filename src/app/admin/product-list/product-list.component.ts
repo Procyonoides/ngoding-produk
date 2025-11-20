@@ -58,6 +58,7 @@ export class ProductListComponent implements OnInit {
   loading = false;
   errorMessage = '';
   successMessage = '';
+  openDropdownId: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -69,6 +70,19 @@ export class ProductListComponent implements OnInit {
     this.username = this.authService.getUsername() || '';
     this.role = this.authService.getRole() || '';
     this.loadProducts();
+  }
+
+  // ✅ Tambahkan method dropdown
+  toggleDropdown(productId: string): void {
+    if (this.openDropdownId === productId) {
+      this.openDropdownId = null;
+    } else {
+      this.openDropdownId = productId;
+    }
+  }
+
+  closeDropdown(): void {
+    this.openDropdownId = null;
   }
 
   getEmptyProduct(): Product {
@@ -201,6 +215,7 @@ export class ProductListComponent implements OnInit {
   openEditModal(product: Product): void {
     this.selectedProduct = { ...product };
     this.errorMessage = '';
+    this.closeDropdown(); // ✅ Tutup dropdown
     const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
     modal.show();
   }
@@ -237,6 +252,7 @@ export class ProductListComponent implements OnInit {
       operation: 'Penambahan'
     };
     this.errorMessage = '';
+    this.closeDropdown(); // ✅ Tutup dropdown
     const modal = new bootstrap.Modal(document.getElementById('updateStockModal'));
     modal.show();
   }
@@ -273,6 +289,7 @@ export class ProductListComponent implements OnInit {
   // ✅ DELETE PRODUCT
   openDeleteModal(product: Product): void {
     this.selectedProduct = { ...product };
+    this.closeDropdown(); // ✅ Tutup dropdown
     const modal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
     modal.show();
   }

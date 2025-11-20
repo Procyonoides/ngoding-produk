@@ -18,6 +18,7 @@ export class NavbarComponent implements OnInit {
   name = '';
   role = '';
   showDropdown = false;
+  showMobileMenu = false;
 
   constructor(
     private authService: AuthService,
@@ -30,12 +31,48 @@ export class NavbarComponent implements OnInit {
     this.role = this.authService.getRole() || '';
   }
 
+  toggleMobileMenu(): void {
+    this.showMobileMenu = !this.showMobileMenu;
+  }
+
+  closeMobileMenu(): void {
+    this.showMobileMenu = false;
+  }
+
   toggleDropdown(): void {
     this.showDropdown = !this.showDropdown;
   }
 
   closeDropdown(): void {
     this.showDropdown = false;
+  }
+
+  goToDashboard(): void {
+    this.closeDropdown();
+    if (this.isAdmin) {
+      this.router.navigate(['/admin/admin-dashboard']);
+    }
+  }
+
+  goToProductList(): void {
+    this.closeDropdown();
+    if (this.isAdmin) {
+      this.router.navigate(['/admin/product-list']);
+    }
+  }
+
+  goToUserManagement(): void {
+    this.closeDropdown();
+    if (this.isAdmin) {
+      this.router.navigate(['/admin/user-management']);
+    }
+  }
+
+  goToUserView(): void {
+    this.closeDropdown();
+    if (!this.isAdmin) {
+      this.router.navigate(['/user/user-view']);
+    }
   }
 
   goToProfile(): void {

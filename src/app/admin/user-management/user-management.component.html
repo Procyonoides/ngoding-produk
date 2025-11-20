@@ -1,13 +1,14 @@
+<!-- Navbar -->
+<app-navbar [isAdmin]="true"></app-navbar>
+
 <div class="container-fluid py-4 px-5 bg-light min-vh-100">
 
   <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h4 class="fw-bold mb-1">Management User</h4>
-      <p class="text-muted mb-0">Lihat semua produk yang tersedia di inventaris.</p>
+      <p class="text-muted mb-0">Kelola semua user dalam sistem.</p>
     </div>
-    <button class="btn btn-outline-danger btn-sm" routerLink="/admin/admin-dashboard">Dashboard</button>
-    <button class="btn btn-outline-danger btn-sm" routerLink="/admin/product-list">Product List</button>
     <button class="btn btn-warning text-white fw-semibold" data-bs-toggle="modal" data-bs-target="#tambahUserModal">
       <i class="bi bi-plus-lg me-1"></i> Tambah User
     </button>
@@ -24,144 +25,173 @@
       <option>Nonaktif</option>
     </select>
     <button class="btn btn-outline-secondary">
-      <i class="bi bi-funnel"></i> Asc
+      <i class="bi bi-funnel"></i> Filter
     </button>
   </div>
 
-  <!-- user-management.component.html -->
+  <!-- Daftar User -->
   <div class="container mt-4">
-    <h4>Daftar User</h4>
-    <table class="table table-bordered table-striped mt-3">
-        <thead class="table-dark">
-        <tr>
-            <th>Nama User</th>
-            <th>No. Telepon</th>
-            <th>Tanggal Dibuat</th>
-            <th>Username</th>
-            <th>E-Mail</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let user of users">
-            <td>{{ user.name }}</td>
-            <td>{{ user.phone }}</td>
-            <td>{{ user.createdAt }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.username }}</td>
-            <td>
-                <span [ngClass]="{
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Nama User</th>
+                <th>No. Telepon</th>
+                <th>Tanggal Dibuat</th>
+                <th>Username</th>
+                <th>E-Mail</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of users">
+                <td><strong>{{ user.name }}</strong></td>
+                <td>{{ user.phone }}</td>
+                <td>{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <span class="text-muted">{{ user.username }}</span>
+                </td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <span [ngClass]="{
                     'badge bg-primary': user.role === 'admin',
                     'badge bg-secondary': user.role === 'user'
-                }">
-                {{ user.role }}
-                </span>
-            </td>
-            <td>
-              <span [ngClass]="{
-                'text-success fw-bold': user.status === 'aktif',
-                'text-danger fw-bold': user.status === 'nonaktif'
-              }">
-                {{ user.status }}
-              </span>
-            </td>
-            <td></td>
-        </tr>
-        </tbody>
-    </table>
+                  }">
+                    {{ user.role | uppercase }}
+                  </span>
+                </td>
+                <td>
+                  <span [ngClass]="{
+                    'badge bg-success': user.status === 'aktif',
+                    'badge bg-danger': user.status === 'nonaktif'
+                  }">
+                    {{ user.status | uppercase }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="dropdown-custom position-relative">
+                    <button class="btn btn-sm btn-light" (click)="toggleDropdown(user._id)" type="button">
+                      <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <div class="dropdown-menu-custom" [class.show]="openDropdownId === user._id" 
+                         *ngIf="openDropdownId === user._id">
+                      <a class="dropdown-item-custom" (click)="editUser(user)">
+                        <i class="bi bi-pencil me-2"></i> Edit
+                      </a>
+                      <a class="dropdown-item-custom" (click)="resetPassword(user)">
+                        <i class="bi bi-lock me-2"></i> Reset Password
+                      </a>
+                      <div class="dropdown-divider-custom"></div>
+                      <a class="dropdown-item-custom text-danger" (click)="deleteUser(user)">
+                        <i class="bi bi-trash me-2"></i> Hapus
+                      </a>
+                    </div>
+                  </div>
+                  <div class="dropdown-overlay" *ngIf="openDropdownId === user._id" (click)="closeDropdown()"></div>
+                </td>
+              </tr>
+              <tr *ngIf="users.length === 0">
+                <td colspan="8" class="text-center py-4 text-muted">
+                  Tidak ada user yang ditemukan
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal Tambah User -->
 <div class="modal fade" id="tambahUserModal" tabindex="-1" aria-labelledby="tambahUserLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <!-- Header -->
-            <div class="modal-header">
-                <div>
-                    <h5 class="modal-title" id="tambahUserLabel">Tambah User</h5>
-                    <p class="description-text mb-0">Masukkan detail user untuk menambahkannya ke management user</p>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- Body -->
-            <div class="modal-body">
-                <form id="userForm" (ngSubmit)="addUser()">
-                    <!-- Upload Gambar -->
-                    <div class="row-gap">
-                        <div class="upload-area" onclick="document.getElementById('imageInput').click()">
-                            <div class="upload-icon">
-                                <i class="far fa-image"></i>
-                            </div>
-                            <div class="upload-text">Unggah Gambar</div>
-                        </div>
-                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                    </div>
-
-                    <!-- Nama User & No Telphone -->
-                    <div class="row row-gap">
-                        <div class="col-md-6">
-                            <label for="namaUser" class="form-label">Nama User<span class="required">*</span></label>
-                            <input type="text" [(ngModel)]="form.name" name="name" class="form-control" id="namaUser" placeholder="Masukan nama produk" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="noTelphone" class="form-label">No Telphone<span class="required">*</span></label>
-                            <input type="text" [(ngModel)]="form.phone" name="phone" class="form-control" id="noTelphone" placeholder="Masukan nomor telepon" required>
-                        </div>
-                    </div>
-
-                    <!-- Username & Password -->
-                    <div class="row row-gap">
-                        <div class="col-md-6">
-                            <label for="username" class="form-label">Username<span class="required">*</span></label>
-                            <input type="text" [(ngModel)]="form.username" name="username" class="form-control" id="username" placeholder="Username" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="password" class="form-label">Password<span class="required">*</span></label>
-                            <input type="password" [(ngModel)]="form.password" name="password" class="form-control" id="password" placeholder="Password" required>
-                        </div>
-                    </div>
-
-                    <!-- Role -->
-                    <div class="row-gap col-md-6">
-                        <label for="role" class="form-label">Pilih Role<span class="required">*</span></label>
-                        <select class="form-select" id="role" [(ngModel)]="form.role" name="role">
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-
-                    <!-- Email -->
-                    <div class="row-gap">
-                        <label for="email" class="form-label">Email<span class="required">*</span></label>
-                        <input type="email" [(ngModel)]="form.email" name="email" class="form-control" id="email" placeholder="Masukan Email" required>
-                    </div>
-
-                    <!-- Status User -->
-                    <div class="row-gap">
-                        <label class="form-label">Status User</label>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" [(ngModel)]="form.status" name="status" type="checkbox" id="statusToggle" role="switch">
-                            <label class="form-check-label" for="statusToggle">
-                                <span id="statusLabel">{{ form.status ? 'Aktif' : 'Nonaktif' }}</span>
-                            </label>
-                        </div>
-                        <div class="status-note">
-                            Jika user telah lama tidak aktif anda bisa menonaktifkan status user secara manual
-                        </div>
-                    </div>
-                    <!-- Footer -->
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-submit">Tambah ✓</button>
-                    </div>
-                </form>
-            </div>
-
-            
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title" id="tambahUserLabel">Tambah User</h5>
+          <p class="description-text mb-0">Masukkan detail user untuk menambahkannya ke management user</p>
         </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <form id="userForm" (ngSubmit)="addUser()">
+          <!-- Upload Gambar -->
+          <div class="row-gap mb-3">
+            <div class="upload-area" onclick="document.getElementById('imageInput').click()">
+              <div class="upload-icon">
+                <i class="bi bi-image"></i>
+              </div>
+              <div class="upload-text">Unggah Gambar</div>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+          </div>
+
+          <!-- Nama User & No Telphone -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="namaUser" class="form-label">Nama User<span class="text-danger">*</span></label>
+              <input type="text" [(ngModel)]="form.name" name="name" class="form-control" id="namaUser" placeholder="Masukan nama user" required>
+            </div>
+            <div class="col-md-6">
+              <label for="noTelphone" class="form-label">No Telphone<span class="text-danger">*</span></label>
+              <input type="text" [(ngModel)]="form.phone" name="phone" class="form-control" id="noTelphone" placeholder="Masukan nomor telepon" required>
+            </div>
+          </div>
+
+          <!-- Username & Password -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="username" class="form-label">Username<span class="text-danger">*</span></label>
+              <input type="text" [(ngModel)]="form.username" name="username" class="form-control" id="username" placeholder="Username" required>
+            </div>
+            <div class="col-md-6">
+              <label for="password" class="form-label">Password<span class="text-danger">*</span></label>
+              <input type="password" [(ngModel)]="form.password" name="password" class="form-control" id="password" placeholder="Password" required>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
+            <input type="email" [(ngModel)]="form.email" name="email" class="form-control" id="email" placeholder="Masukan Email" required>
+          </div>
+
+          <!-- Role & Status -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="role" class="form-label">Pilih Role<span class="text-danger">*</span></label>
+              <select class="form-select" id="role" [(ngModel)]="form.role" name="role" required>
+                <option value="">-- Pilih Role --</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Status User</label>
+              <div class="form-check form-switch mt-2">
+                <input class="form-check-input" [(ngModel)]="form.status" name="status" type="checkbox" id="statusToggle" role="switch">
+                <label class="form-check-label" for="statusToggle">
+                  <span id="statusLabel">{{ form.status ? 'Aktif' : 'Nonaktif' }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-warning text-white fw-semibold">Tambah ✓</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
