@@ -49,6 +49,7 @@ export class AuthService {
     }
   }
   
+  // ✅ Getters
   getToken(): string | null {
     return this.isBrowser() ? localStorage.getItem(this.tokenKey) : null;
   }
@@ -62,7 +63,7 @@ export class AuthService {
   }
 
   getName(): string | null {
-    return localStorage.getItem('name');
+    return this.isBrowser() ? localStorage.getItem(this.nameKey) : null;
   }
 
   // ✅ Check login status

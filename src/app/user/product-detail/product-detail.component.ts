@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
+import { NavbarComponent } from '../../shared/navbar/navbar.component';
 
 interface Product {
   _id?: string;
@@ -21,11 +22,11 @@ interface Product {
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NavbarComponent],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.css'
 })
-export class ProductDetailComponent {
+export class ProductDetailComponent implements OnInit{
   product: Product | null = null;
   relatedProducts: Product[] = [];
   loading = true;

@@ -38,6 +38,7 @@ export class UserViewComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 8;
   totalPages = 0;
+  Math = Math;
 
   constructor(private router: Router, private http: HttpClient) {}
 
@@ -130,6 +131,13 @@ export class UserViewComponent implements OnInit {
     }
     
     return pages;
+  }
+
+  getDisplayRange(): { start: number; end: number; total: number } {
+    const start = (this.currentPage - 1) * this.itemsPerPage + 1;
+    const end = Math.min(this.currentPage * this.itemsPerPage, this.filteredProducts.length);
+    const total = this.filteredProducts.length;
+    return { start, end, total };
   }
 
   viewProductDetail(productId: string | undefined): void {

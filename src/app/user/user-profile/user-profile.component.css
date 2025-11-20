@@ -1,0 +1,50 @@
+.profile-wrapper {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: calc(100vh - 70px);
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.avatar-text {
+  font-size: 3rem;
+  font-weight: 700;
+  color: white;
+}
+
+.card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.form-control[readonly] {
+  background-color: #f8f9fa;
+  border-color: #e9ecef;
+}
+
+.form-control:not([readonly]):focus {
+  border-color: var(--primary-orange);
+  box-shadow: 0 0 0 0.2rem rgba(255, 123, 0, 0.15);
+}
+
+.btn-primary {
+  background: var(--primary-orange);
+  border-color: var(--primary-orange);
+}
+
+.btn-primary:hover {
+  background: var(--primary-orange-hover);
+  border-color: var(--primary-orange-hover);
+}
+
+.form-label i {
+  font-size: 1.1rem;
+}

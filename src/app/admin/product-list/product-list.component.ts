@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { NavbarComponent } from '../../shared/navbar/navbar.component';
 
 declare var bootstrap: any;
 
@@ -24,11 +25,11 @@ interface Product {
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, NavbarComponent],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css'
 })
-export class ProductListComponent {
+export class ProductListComponent implements OnInit {
   username = '';
   role = '';
   products: Product[] = [];

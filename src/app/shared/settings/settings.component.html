@@ -1,0 +1,60 @@
+<!-- Navbar -->
+<app-navbar [isAdmin]="isAdmin" [transparent]="false"></app-navbar>
+
+<!-- Main Content -->
+<div class="settings-wrapper">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 text-center">
+        <!-- Under Development -->
+        <div class="card border-0 shadow-sm p-5">
+          <div class="construction-icon mb-4">
+            <i class="bi bi-tools"></i>
+          </div>
+          <h2 class="fw-bold mb-3">Halaman Settings</h2>
+          <h4 class="text-muted mb-4">Masih Dalam Tahap Pengembangan</h4>
+          <p class="text-secondary mb-4">
+            Kami sedang bekerja keras untuk menghadirkan fitur pengaturan yang lengkap dan mudah digunakan.
+            Mohon tunggu update selanjutnya!
+          </p>
+          
+          <div class="features-preview mb-4">
+            <h5 class="fw-semibold mb-3">Fitur yang Akan Hadir:</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="feature-item p-3 bg-light rounded">
+                  <i class="bi bi-shield-check text-primary me-2"></i>
+                  Keamanan & Privasi
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="feature-item p-3 bg-light rounded">
+                  <i class="bi bi-bell text-warning me-2"></i>
+                  Notifikasi
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="feature-item p-3 bg-light rounded">
+                  <i class="bi bi-palette text-success me-2"></i>
+                  Tema & Tampilan
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="feature-item p-3 bg-light rounded">
+                  <i class="bi bi-globe text-info me-2"></i>
+                  Bahasa & Lokasi
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary px-5 py-3" 
+                  [routerLink]="isAdmin ? '/admin/admin-dashboard' : '/user/user-view'">
+            <i class="bi bi-arrow-left me-2"></i>
+            {{ isAdmin ? 'Kembali ke Dashboard' : 'Kembali ke Beranda' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

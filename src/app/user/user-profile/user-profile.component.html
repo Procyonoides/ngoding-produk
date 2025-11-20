@@ -1,0 +1,140 @@
+<!-- Navbar -->
+<app-navbar [isAdmin]="false" [transparent]="false"></app-navbar>
+
+<!-- Main Content -->
+<div class="profile-wrapper">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h2 class="fw-bold mb-1">Profil Saya</h2>
+            <p class="text-muted mb-0">Kelola informasi profil Anda</p>
+          </div>
+          <button class="btn btn-outline-secondary" routerLink="/user/user-view">
+            <i class="bi bi-arrow-left me-2"></i>
+            Kembali
+          </button>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show">
+          <i class="bi bi-check-circle me-2"></i>
+          {{ successMessage }}
+          <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+        </div>
+
+        <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show">
+          <i class="bi bi-exclamation-circle me-2"></i>
+          {{ errorMessage }}
+          <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-5">
+            <!-- Avatar Section -->
+            <div class="text-center mb-4">
+              <div class="profile-avatar mx-auto mb-3">
+                <span class="avatar-text">{{ profile.name.charAt(0).toUpperCase() }}</span>
+              </div>
+              <h4 class="fw-bold mb-1">{{ profile.name }}</h4>
+              <p class="text-muted">{{ '@' }}{{ profile.username }}</p>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Profile Form -->
+            <form (ngSubmit)="saveProfile()">
+              <div class="row g-4">
+                <!-- Nama -->
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">
+                    <i class="bi bi-person me-2 text-primary"></i>
+                    Nama Lengkap
+                  </label>
+                  <input type="text" 
+                         class="form-control" 
+                         [(ngModel)]="profile.name" 
+                         name="name"
+                         [readonly]="!isEditing"
+                         required>
+                </div>
+
+                <!-- Username -->
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">
+                    <i class="bi bi-at me-2 text-primary"></i>
+                    Username
+                  </label>
+                  <input type="text" 
+                         class="form-control" 
+                         [(ngModel)]="profile.username" 
+                         name="username"
+                         [readonly]="!isEditing"
+                         required>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">
+                    <i class="bi bi-envelope me-2 text-primary"></i>
+                    Email
+                  </label>
+                  <input type="email" 
+                         class="form-control" 
+                         [(ngModel)]="profile.email" 
+                         name="email"
+                         [readonly]="!isEditing"
+                         required>
+                </div>
+
+                <!-- Phone -->
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">
+                    <i class="bi bi-telephone me-2 text-primary"></i>
+                    No. Telepon
+                  </label>
+                  <input type="tel" 
+                         class="form-control" 
+                         [(ngModel)]="profile.phone" 
+                         name="phone"
+                         [readonly]="!isEditing"
+                         required>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-flex gap-3 mt-4">
+                <button type="button" 
+                        *ngIf="!isEditing"
+                        class="btn btn-primary flex-grow-1"
+                        (click)="toggleEdit()">
+                  <i class="bi bi-pencil me-2"></i>
+                  Edit Profile
+                </button>
+
+                <button type="button" 
+                        *ngIf="isEditing"
+                        class="btn btn-secondary flex-grow-1"
+                        (click)="toggleEdit()">
+                  <i class="bi bi-x-circle me-2"></i>
+                  Batal
+                </button>
+
+                <button type="submit" 
+                        *ngIf="isEditing"
+                        class="btn btn-success flex-grow-1"
+                        [disabled]="loading">
+                  <i class="bi bi-check-circle me-2"></i>
+                  {{ loading ? 'Menyimpan...' : 'Simpan Perubahan' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
