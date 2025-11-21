@@ -30,7 +30,7 @@
   </div>
 
   <!-- Daftar User -->
-  <div class="container mt-4">
+  <div class="mt-4">
     <div class="card border-0 shadow-sm">
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -56,21 +56,18 @@
                   <span class="text-muted">{{ user.username }}</span>
                 </td>
                 <td>{{ user.email }}</td>
+                <!-- ✅ ROLE - Pakai Custom Badge -->
                 <td>
-                  <span [ngClass]="{
-                    'badge bg-primary': user.role === 'admin',
-                    'badge bg-secondary': user.role === 'user'
-                  }">
-                    {{ user.role | uppercase }}
-                  </span>
+                    <span class="custom-badge badge-{{ user.role }}">
+                        {{ user.role | uppercase }}
+                    </span>
                 </td>
+                
+                <!-- ✅ STATUS - Pakai Custom Badge -->
                 <td>
-                  <span [ngClass]="{
-                    'badge bg-success': user.status === 'aktif',
-                    'badge bg-danger': user.status === 'nonaktif'
-                  }">
-                    {{ user.status | uppercase }}
-                  </span>
+                    <span class="custom-badge badge-{{ user.status }}">
+                        {{ user.status | uppercase }}
+                    </span>
                 </td>
                 <td class="text-center">
                   <div class="dropdown-custom position-relative">

@@ -35,7 +35,7 @@
         </div>
 
         <!-- Profile Card -->
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm mb-4">
           <div class="card-body p-5">
             <!-- Avatar Section -->
             <div class="text-center mb-4">
@@ -137,6 +137,108 @@
             </form>
           </div>
         </div>
+
+        <!-- ✅ Change Password Card -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-5">
+            <h5 class="fw-bold mb-4">
+              <i class="bi bi-shield-lock text-warning me-2"></i>
+              Ganti Password
+            </h5>
+
+            <form (ngSubmit)="changePassword()">
+              <div class="row g-4">
+                <div class="col-12">
+                  <label class="form-label fw-semibold">
+                    <i class="bi bi-lock me-2 text-primary"></i>
+                    Password Lama
+                  </label>
+                  <div class="input-group">
+                    <input [type]="showOldPassword ? 'text' : 'password'" 
+                           class="form-control" 
+                           [(ngModel)]="passwordForm.oldPassword" 
+                           name="oldPassword"
+                           placeholder="Masukkan password lama"
+                           required>
+                    <button class="btn btn-outline-secondary" 
+                            type="button"
+                            (click)="showOldPassword = !showOldPassword">
+                      <i class="bi" [ngClass]="showOldPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">
+                    <i class="bi bi-lock-fill me-2 text-primary"></i>
+                    Password Baru
+                  </label>
+                  <div class="input-group">
+                    <input [type]="showNewPassword ? 'text' : 'password'" 
+                           class="form-control" 
+                           [(ngModel)]="passwordForm.newPassword" 
+                           name="newPassword"
+                           placeholder="Masukkan password baru"
+                           required>
+                    <button class="btn btn-outline-secondary" 
+                            type="button"
+                            (click)="showNewPassword = !showNewPassword">
+                      <i class="bi" [ngClass]="showNewPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                    </button>
+                  </div>
+                  <small class="text-muted">Minimal 8 karakter</small>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">
+                    <i class="bi bi-lock-fill me-2 text-primary"></i>
+                    Konfirmasi Password
+                  </label>
+                  <div class="input-group">
+                    <input [type]="showConfirmPassword ? 'text' : 'password'" 
+                           class="form-control" 
+                           [(ngModel)]="passwordForm.confirmPassword" 
+                           name="confirmPassword"
+                           placeholder="Konfirmasi password baru"
+                           [ngClass]="{'is-invalid': passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword}"
+                           required>
+                    <button class="btn btn-outline-secondary" 
+                            type="button"
+                            (click)="showConfirmPassword = !showConfirmPassword">
+                      <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                    </button>
+                  </div>
+                  <small class="text-danger" *ngIf="passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword">
+                    Password tidak cocok
+                  </small>
+                </div>
+              </div>
+
+              <!-- Password Strength Indicator -->
+              <div class="mt-3" *ngIf="passwordForm.newPassword">
+                <label class="form-label small fw-semibold">Kekuatan Password:</label>
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar" 
+                       [ngClass]="getPasswordStrengthClass()" 
+                       [style.width.%]="getPasswordStrength()"
+                       role="progressbar"></div>
+                </div>
+                <small class="text-muted">{{ getPasswordStrengthText() }}</small>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="mt-4">
+                <button type="submit" 
+                        class="btn btn-warning text-white px-5"
+                        [disabled]="loading || passwordForm.newPassword !== passwordForm.confirmPassword || !passwordForm.oldPassword || !passwordForm.newPassword">
+                  <i class="bi bi-shield-check me-2"></i>
+                  {{ loading ? 'Mengubah Password...' : 'Ganti Password' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
       </div>
     </div>
   </div>

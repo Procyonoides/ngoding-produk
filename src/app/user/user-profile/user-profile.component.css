@@ -35,12 +35,51 @@
   box-shadow: 0 0 0 0.2rem rgba(255, 123, 0, 0.15);
 }
 
+/* ✅ Password Input Group */
+.input-group .btn {
+  z-index: 0;
+}
+
+.input-group .form-control:focus {
+  z-index: 1;
+}
+
+/* ✅ Invalid Input */
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.form-control.is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* ✅ Progress Bar */
+.progress {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
 .btn-primary {
   background: var(--primary-orange);
   border-color: var(--primary-orange);
 }
 
 .btn-primary:hover {
+  background: var(--primary-orange-hover);
+  border-color: var(--primary-orange-hover);
+}
+
+.btn-warning {
+  background: var(--primary-orange);
+  border-color: var(--primary-orange);
+}
+
+.btn-warning:hover {
   background: var(--primary-orange-hover);
   border-color: var(--primary-orange-hover);
 }

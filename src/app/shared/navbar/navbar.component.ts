@@ -97,7 +97,10 @@ export class NavbarComponent implements OnInit {
 
   logout(): void {
     this.closeDropdown();
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    // Confirm logout
+    if (confirm('Apakah Anda yakin ingin logout?')) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    }
   }
 }

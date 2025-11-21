@@ -134,6 +134,10 @@
   transform: translateY(-1px);
 }
 
+.user-trigger.active {
+  background: #e9ecef;
+}
+
 .user-avatar {
   width: 40px;
   height: 40px;
@@ -179,6 +183,7 @@
   transition: all 0.3s ease;
   border: 1px solid #e9ecef;
   overflow: hidden;
+  z-index: 1050;
 }
 
 .dropdown-menu-custom.show {
@@ -196,6 +201,7 @@
   color: #495057;
   font-weight: 500;
   font-size: 0.95rem;
+  text-decoration: none;
 }
 
 .dropdown-item-custom:hover {
@@ -231,6 +237,7 @@
   bottom: 0;
   z-index: 999;
   background: transparent;
+  cursor: default;
 }
 
 /* Animation */
