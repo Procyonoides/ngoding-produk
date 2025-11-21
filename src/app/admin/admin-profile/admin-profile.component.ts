@@ -35,7 +35,8 @@ export class AdminProfileComponent implements OnInit {
   showConfirmPassword = false;
   
   isEditing = false;
-  loading = false;
+  loadingProfile = false;
+  loadingPassword = false;
   successMessage = '';
   errorMessage = '';
 
@@ -61,27 +62,95 @@ export class AdminProfileComponent implements OnInit {
     if (!this.isEditing) {
       this.loadProfile();
     }
+    this.errorMessage = '';
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin/admin-dashboard']);
   }
 
   saveProfile(): void {
-    this.loading = true;
+    // Validasi
+    if (!this.profile.name || !this.profile.username || !this.profile.email || !this.profile.phone) {
+      this.errorMessage = 'Semua field wajib diisi!';
+      return;
+    }
+
+    // Validasi email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.profile.email)) {
+      this.errorMessage = 'Format email tidak valid!';
+      return;
+    }
+
+    // Validasi phone format
+    const phoneRegex = /^(\+62|62|0)[0-9]{9,12}$/;
+    if (!phoneRegex.test(this.profile.phone)) {
+      this.errorMessage = 'Format nomor telepon tidak valid!';
+      return;
+    }
+
+    this.loadingProfile = true; // ✅ Pakai loadingProfile
     this.errorMessage = '';
     this.successMessage = '';
 
-    setTimeout(() => {
-      this.successMessage = 'Profile berhasil diupdate!';
-      this.loading = false;
-      this.isEditing = false;
-      
-      setTimeout(() => {
-        this.successMessage = '';
-      }, 3000);
-    }, 1000);
+    // ✅ Payload untuk API
+    const userId = this.authService.getUserId();
+    const payload = {
+      full_name: this.profile.name,
+      username: this.profile.username,
+      email: this.profile.email,
+      phone: this.profile.phone
+    };
+
+    // ✅ Call API update profile
+    this.http.put(`http://localhost:5000/api/users/${userId}`, payload).subscribe({
+      next: (res: any) => {
+        console.log('✅ Update profile success:', res);
+        
+        // ✅ Update localStorage dengan data baru
+        if (this.profile.name) {
+          localStorage.setItem('name', this.profile.name);
+        }
+        if (this.profile.username) {
+          localStorage.setItem('username', this.profile.username);
+        }
+
+        this.successMessage = 'Profile berhasil diupdate!';
+        this.loadingProfile = false;
+        this.isEditing = false;
+        
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
+      },
+      error: (err) => {
+        console.error('❌ Update profile error:', err);
+        this.loadingProfile = false;
+        
+        if (err.status === 400) {
+          this.errorMessage = err.error?.message || 'Data tidak valid!';
+        } else if (err.status === 409) {
+          this.errorMessage = 'Username atau email sudah digunakan!';
+        } else {
+          this.errorMessage = 'Gagal update profile. Silakan coba lagi.';
+        }
+      }
+    });
   }
 
   // ✅ Change Password
   changePassword(): void {
-    // Validasi
+    if (!this.passwordForm.oldPassword) {
+      this.errorMessage = 'Password lama wajib diisi!';
+      return;
+    }
+
+    if (!this.passwordForm.newPassword) {
+      this.errorMessage = 'Password baru wajib diisi!';
+      return;
+    }
+
     if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
       this.errorMessage = 'Password baru dan konfirmasi tidak cocok!';
       return;
@@ -92,35 +161,60 @@ export class AdminProfileComponent implements OnInit {
       return;
     }
 
-    this.loading = true;
+    // ✅ Cek apakah password baru sama dengan password lama
+    if (this.passwordForm.oldPassword === this.passwordForm.newPassword) {
+      this.errorMessage = 'Password baru tidak boleh sama dengan password lama!';
+      return;
+    }
+
+    this.loadingPassword = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    // TODO: Implement API call untuk change password
-    // const payload = {
-    //   oldPassword: this.passwordForm.oldPassword,
-    //   newPassword: this.passwordForm.newPassword
-    // };
-    // this.http.post('http://localhost:5000/api/auth/change-password', payload).subscribe({...})
+    // ✅ Payload untuk API
+    const payload = {
+      oldPassword: this.passwordForm.oldPassword,
+      newPassword: this.passwordForm.newPassword
+    };
 
-    // Simulasi API call
-    setTimeout(() => {
-      this.successMessage = 'Password berhasil diubah! Silakan login kembali.';
-      this.loading = false;
-      
-      // Reset form
-      this.passwordForm = {
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      };
+    // ✅ Call API change password
+    this.http.post('http://localhost:5000/api/auth/change-password', payload).subscribe({
+      next: (res: any) => {
+        console.log('✅ Change password success:', res);
+        
+        this.successMessage = 'Password berhasil diubah! Silakan login kembali.';
+        this.loadingPassword = false;
+        
+        // ✅ Reset form
+        this.passwordForm = {
+          oldPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        };
 
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        this.authService.logout();
-        this.router.navigate(['/login']);
-      }, 2000);
-    }, 1000);
+        // ✅ Redirect to login after 2 seconds
+        setTimeout(() => {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }, 2000);
+      },
+      error: (err) => {
+        console.error('❌ Change password error:', err);
+        this.loadingPassword = false;
+        
+        // ✅ Handle error dari backend
+        if (err.status === 401 || err.status === 400) {
+          this.errorMessage = err.error?.message || 'Password lama tidak sesuai!';
+        } else if (err.status === 403) {
+          this.errorMessage = 'Anda tidak memiliki akses untuk mengubah password!';
+        } else {
+          this.errorMessage = 'Gagal mengubah password. Silakan coba lagi.';
+        }
+
+        // ✅ Jangan reset form jika error, biar user bisa perbaiki
+        // ✅ Jangan redirect ke login jika error
+      }
+    });
   }
 
   // ✅ Password Strength Checker

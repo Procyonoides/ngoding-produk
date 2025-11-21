@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -52,6 +52,7 @@ export class UserViewComponent implements OnInit {
       next: (res) => {
         this.products = res.filter(p => p.status === 'Aktif' || p.status === 'Menipis');
         this.filteredProducts = [...this.products];
+        this.currentPage = 1; // ✅ Reset ke halaman 1
         this.updatePagination();
         this.loading = false;
       },
@@ -64,13 +65,39 @@ export class UserViewComponent implements OnInit {
   }
 
   searchProduct(): void {
-    if (this.searchQuery.trim() === '') {
+    const query = this.searchQuery.trim().toLowerCase();
+
+    if (query === '') {
+      // ✅ Jika search kosong, tampilkan semua produk
       this.filteredProducts = [...this.products];
     } else {
+      // ✅ Filter berdasarkan nama, kategori, atau deskripsi
       this.filteredProducts = this.products.filter(p =>
-        p.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(this.searchQuery.toLowerCase())
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query)
       );
+    }
+
+    // ✅ Reset ke halaman 1 setelah search
+    this.currentPage = 1;
+    this.updatePagination();
+
+    // ✅ Scroll ke hasil pencarian
+    this.scrollToResults();
+  }
+
+  // ✅ Clear Search - Bonus Feature
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.searchProduct();
+  }
+
+  // ✅ Scroll ke section hasil
+  scrollToResults(): void {
+    const element = document.querySelector('.section-header');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
@@ -146,4 +173,21 @@ export class UserViewComponent implements OnInit {
     }
   }
 
+  onSearchInput(): void {
+    // ✅ Debounce untuk performa lebih baik
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.searchProduct();
+    }, 300); // Search setelah 300ms user berhenti mengetik
+  }
+
+  // ✅ Tambahkan property
+  private searchTimeout: any;
+
+  // ✅ Cleanup saat component destroy
+  ngOnDestroy(): void {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+  }
 }

@@ -22,12 +22,13 @@
 
   <!-- Filter Row -->
   <div class="d-flex flex-wrap gap-2 mb-3">
-    <div class="input-group" style="max-width: 250px;">
-      <span class="input-group-text bg-white border-end-0">
-        <i class="bi bi-search"></i>
-      </span>
-      <input type="text" class="form-control border-start-0" placeholder="Cari produk" 
-             [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
+    <div class="search-box" style="max-width: 250px;">
+      <i class="bi bi-search search-icon"></i>
+      <input type="text" 
+            class="form-control search-field" 
+            placeholder="Cari produk" 
+            [(ngModel)]="searchQuery" 
+            (ngModelChange)="onSearchChange()" />
     </div>
 
     <select class="form-select" style="max-width: 200px;" 
@@ -50,17 +51,20 @@
     </div>
   </div>
 
-  <!-- Sort -->
+  <!-- Sort - Custom Style -->
   <div class="d-flex justify-content-end align-items-center mb-2 gap-2">
-    <label class="text-muted">Urutkan:</label>
-    <select class="form-select form-select-sm w-auto" [(ngModel)]="sortBy" (change)="onSortChange()">
-      <option value="name">Nama Produk</option>
-      <option value="stock">Stok</option>
-      <option value="price">Harga</option>
-      <option value="category">Kategori</option>
-    </select>
-    <button class="btn btn-light btn-sm border" (click)="toggleSortOrder()">
-      <i class="bi bi-arrow-down-up"></i> {{ sortOrder === 'asc' ? 'Asc' : 'Desc' }}
+    <label class="text-muted mb-0 fw-semibold">Urutkan:</label>
+    <div class="sort-select-wrapper">
+      <select class="form-select form-select-sm sort-select pe-5" [(ngModel)]="sortBy" (change)="onSortChange()">
+        <option value="name">Nama Produk</option>
+        <option value="stock">Stok</option>
+        <option value="price">Harga</option>
+        <option value="category">Kategori</option>
+      </select>
+    </div>
+    <button class="btn btn-light btn-sm border d-flex align-items-center gap-1" (click)="toggleSortOrder()">
+      <i class="bi bi-arrow-down-up"></i>
+      <span>{{ sortOrder === 'asc' ? 'Asc' : 'Desc' }}</span>
     </button>
   </div>
 

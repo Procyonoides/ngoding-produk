@@ -126,9 +126,9 @@
                 <button type="submit" 
                         *ngIf="isEditing"
                         class="btn btn-success flex-grow-1"
-                        [disabled]="loading">
+                        [disabled]="loadingProfile">
                   <i class="bi bi-check-circle me-2"></i>
-                  {{ loading ? 'Menyimpan...' : 'Simpan Perubahan' }}
+                  {{ loadingProfile ? 'Menyimpan...' : 'Simpan Perubahan' }}
                 </button>
               </div>
             </form>
@@ -227,9 +227,9 @@
               <div class="mt-4">
                 <button type="submit" 
                         class="btn btn-warning text-white px-5"
-                        [disabled]="loading || passwordForm.newPassword !== passwordForm.confirmPassword || !passwordForm.oldPassword || !passwordForm.newPassword">
+                        [disabled]="loadingPassword || passwordForm.newPassword !== passwordForm.confirmPassword || !passwordForm.oldPassword || !passwordForm.newPassword">
                   <i class="bi bi-shield-check me-2"></i>
-                  {{ loading ? 'Mengubah Password...' : 'Ganti Password' }}
+                  {{ loadingPassword ? 'Mengubah Password...' : 'Ganti Password' }}
                 </button>
               </div>
             </form>

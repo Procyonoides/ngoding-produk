@@ -36,7 +36,8 @@ export class UserProfileComponent implements OnInit {
   showConfirmPassword = false;
   
   isEditing = false;
-  loading = false;
+  loadingProfile = false;
+  loadingPassword = false;
   successMessage = '';
   errorMessage = '';
 
@@ -64,17 +65,18 @@ export class UserProfileComponent implements OnInit {
     if (!this.isEditing) {
       this.loadProfile(); // Reset jika cancel
     }
+    this.errorMessage = '';
   }
 
   saveProfile(): void {
-    this.loading = true;
+    this.loadingProfile = true;
     this.errorMessage = '';
     this.successMessage = '';
 
     // TODO: Implement API call to update profile
     setTimeout(() => {
       this.successMessage = 'Profile berhasil diupdate!';
-      this.loading = false;
+      this.loadingProfile = false;
       this.isEditing = false;
       
       setTimeout(() => {
@@ -85,7 +87,16 @@ export class UserProfileComponent implements OnInit {
 
   // ✅ Change Password
   changePassword(): void {
-    // Validasi
+    if (!this.passwordForm.oldPassword) {
+      this.errorMessage = 'Password lama wajib diisi!';
+      return;
+    }
+
+    if (!this.passwordForm.newPassword) {
+      this.errorMessage = 'Password baru wajib diisi!';
+      return;
+    }
+
     if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
       this.errorMessage = 'Password baru dan konfirmasi tidak cocok!';
       return;
@@ -96,35 +107,51 @@ export class UserProfileComponent implements OnInit {
       return;
     }
 
-    this.loading = true;
+    if (this.passwordForm.oldPassword === this.passwordForm.newPassword) {
+      this.errorMessage = 'Password baru tidak boleh sama dengan password lama!';
+      return;
+    }
+
+    this.loadingPassword = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    // TODO: Implement API call untuk change password
-    // const payload = {
-    //   oldPassword: this.passwordForm.oldPassword,
-    //   newPassword: this.passwordForm.newPassword
-    // };
-    // this.http.post('http://localhost:5000/api/auth/change-password', payload).subscribe({...})
+    const payload = {
+      oldPassword: this.passwordForm.oldPassword,
+      newPassword: this.passwordForm.newPassword
+    };
 
-    // Simulasi API call
-    setTimeout(() => {
-      this.successMessage = 'Password berhasil diubah! Silakan login kembali.';
-      this.loading = false;
-      
-      // Reset form
-      this.passwordForm = {
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      };
+    this.http.post('http://localhost:5000/api/auth/change-password', payload).subscribe({
+      next: (res: any) => {
+        console.log('✅ Change password success:', res);
+        
+        this.successMessage = 'Password berhasil diubah! Silakan login kembali.';
+        this.loadingPassword = false;
+        
+        this.passwordForm = {
+          oldPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        };
 
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        this.authService.logout();
-        this.router.navigate(['/login']);
-      }, 2000);
-    }, 1000);
+        setTimeout(() => {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }, 2000);
+      },
+      error: (err) => {
+        console.error('❌ Change password error:', err);
+        this.loadingPassword = false;
+        
+        if (err.status === 401 || err.status === 400) {
+          this.errorMessage = err.error?.message || 'Password lama tidak sesuai!';
+        } else if (err.status === 403) {
+          this.errorMessage = 'Anda tidak memiliki akses untuk mengubah password!';
+        } else {
+          this.errorMessage = 'Gagal mengubah password. Silakan coba lagi.';
+        }
+      }
+    });
   }
 
   // ✅ Password Strength Checker

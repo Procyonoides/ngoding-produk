@@ -108,32 +108,39 @@
                 </div>
               </div>
 
-              <!-- Action Buttons -->
-              <div class="d-flex gap-3 mt-4">
-                <button type="button" 
-                        *ngIf="!isEditing"
-                        class="btn btn-primary flex-grow-1"
-                        (click)="toggleEdit()">
-                  <i class="bi bi-pencil me-2"></i>
-                  Edit Profile
-                </button>
+                <!-- Action Buttons -->
+                <div class="d-flex gap-3 mt-4">
+                    <button type="button" 
+                            *ngIf="!isEditing"
+                            class="btn btn-primary flex-grow-1"
+                            (click)="toggleEdit()">
+                        <i class="bi bi-pencil me-2"></i>
+                        Edit Profile
+                    </button>
 
-                <button type="button" 
-                        *ngIf="isEditing"
-                        class="btn btn-secondary flex-grow-1"
-                        (click)="toggleEdit()">
-                  <i class="bi bi-x-circle me-2"></i>
-                  Batal
-                </button>
+                    <button type="button" 
+                            *ngIf="isEditing"
+                            class="btn btn-secondary flex-grow-1"
+                            (click)="toggleEdit()">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Batal
+                    </button>
 
-                <button type="submit" 
-                        *ngIf="isEditing"
-                        class="btn btn-success flex-grow-1"
-                        [disabled]="loading">
-                  <i class="bi bi-check-circle me-2"></i>
-                  {{ loading ? 'Menyimpan...' : 'Simpan Perubahan' }}
-                </button>
-              </div>
+                    <button type="submit" 
+                            *ngIf="isEditing"
+                            class="btn btn-success flex-grow-1"
+                            [disabled]="loadingProfile">
+                        <!-- ✅ Pakai loadingProfile -->
+                        <span *ngIf="!loadingProfile">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Simpan Perubahan
+                        </span>
+                        <span *ngIf="loadingProfile">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Menyimpan...
+                        </span>
+                    </button>
+                </div>
             </form>
           </div>
         </div>
@@ -226,15 +233,22 @@
                 <small class="text-muted">{{ getPasswordStrengthText() }}</small>
               </div>
 
-              <!-- Submit Button -->
-              <div class="mt-4">
-                <button type="submit" 
-                        class="btn btn-warning text-white px-5"
-                        [disabled]="loading || passwordForm.newPassword !== passwordForm.confirmPassword || !passwordForm.oldPassword || !passwordForm.newPassword">
-                  <i class="bi bi-shield-check me-2"></i>
-                  {{ loading ? 'Mengubah Password...' : 'Ganti Password' }}
-                </button>
-              </div>
+                <!-- Submit Button -->
+                <div class="mt-4">
+                    <button type="submit" 
+                            class="btn btn-warning text-white px-5"
+                            [disabled]="loadingPassword || passwordForm.newPassword !== passwordForm.confirmPassword || !passwordForm.oldPassword || !passwordForm.newPassword">
+                        <!-- ✅ Pakai loadingPassword -->
+                        <span *ngIf="!loadingPassword">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Ganti Password
+                        </span>
+                        <span *ngIf="loadingPassword">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Mengubah Password...
+                        </span>
+                    </button>
+                </div>
             </form>
           </div>
         </div>
