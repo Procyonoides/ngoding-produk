@@ -1,0 +1,262 @@
+<!-- Navbar -->
+<app-navbar [isAdmin]="true"></app-navbar>
+
+<!-- Main Content -->
+<div class="statistics-wrapper bg-light min-vh-100">
+  <div class="container-fluid px-4 py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">
+          <i class="bi bi-graph-up text-primary me-2"></i>
+          Statistik & Laporan
+        </h2>
+        <p class="text-muted mb-0">Overview data produk, user, dan kategori</p>
+      </div>
+      <button class="btn btn-outline-secondary" routerLink="/admin/admin-dashboard">
+        <i class="bi bi-arrow-left me-2"></i>
+        Dashboard
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Statistics Content -->
+    <div *ngIf="!loading">
+      <!-- Summary Cards -->
+      <div class="row g-4 mb-4">
+        <!-- Total Products -->
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted mb-1 small">Total Produk</p>
+                  <h2 class="fw-bold mb-0">{{ statistics.totalProducts }}</h2>
+                </div>
+                <div class="icon-box bg-primary-light">
+                  <i class="bi bi-box-seam text-primary fs-3"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Products -->
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted mb-1 small">Produk Aktif</p>
+                  <h2 class="fw-bold mb-0 text-success">{{ statistics.activeProducts }}</h2>
+                </div>
+                <div class="icon-box bg-success-light">
+                  <i class="bi bi-check-circle text-success fs-3"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Low Stock -->
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted mb-1 small">Stok Menipis</p>
+                  <h2 class="fw-bold mb-0 text-warning">{{ statistics.lowStock }}</h2>
+                </div>
+                <div class="icon-box bg-warning-light">
+                  <i class="bi bi-exclamation-triangle text-warning fs-3"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Out of Stock -->
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted mb-1 small">Stok Habis</p>
+                  <h2 class="fw-bold mb-0 text-danger">{{ statistics.outOfStock }}</h2>
+                </div>
+                <div class="icon-box bg-danger-light">
+                  <i class="bi bi-x-circle text-danger fs-3"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Statistics -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-4">
+                <i class="bi bi-grid-3x3-gap me-2"></i>
+                Statistik Kategori
+              </h5>
+              
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted">Total Kategori</span>
+                  <span class="fw-bold">{{ statistics.totalCategories }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-muted">Kategori Aktif</span>
+                  <span class="badge bg-success">{{ statistics.activeCategories }}</span>
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <!-- Top Categories -->
+              <h6 class="fw-semibold mb-3">Kategori Teratas</h6>
+              <div class="category-list">
+                <div class="category-item" *ngFor="let cat of topCategories">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <i [ngClass]="'bi ' + cat.icon" 
+                         [style.color]="cat.color"
+                         [style.fontSize.rem]="1.25"></i>
+                      <span class="fw-semibold">{{ cat.name | titlecase }}</span>
+                    </div>
+                    <span class="badge bg-primary">{{ cat.productCount }} produk</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Statistics -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-4">
+                <i class="bi bi-people me-2"></i>
+                Statistik User
+              </h5>
+              
+              <div class="row g-3 mb-4">
+                <div class="col-6">
+                  <div class="stat-box text-center p-3 bg-light rounded">
+                    <p class="text-muted mb-1 small">Total User</p>
+                    <h3 class="fw-bold mb-0">{{ statistics.totalUsers }}</h3>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="stat-box text-center p-3 bg-light rounded">
+                    <p class="text-muted mb-1 small">User Aktif</p>
+                    <h3 class="fw-bold mb-0 text-success">{{ statistics.activeUsers }}</h3>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <!-- Role Distribution -->
+              <h6 class="fw-semibold mb-3">Distribusi Role</h6>
+              <div class="role-distribution">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-check text-danger"></i>
+                    <span>Administrator</span>
+                  </div>
+                  <span class="badge bg-danger">{{ statistics.adminCount }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-person text-secondary"></i>
+                    <span>User</span>
+                  </div>
+                  <span class="badge bg-secondary">{{ statistics.userCount }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Status Breakdown -->
+      <div class="row g-4">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-4">
+                <i class="bi bi-bar-chart me-2"></i>
+                Status Produk
+              </h5>
+              
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Status</th>
+                      <th>Jumlah Produk</th>
+                      <th>Persentase</th>
+                      <th>Progress</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <span class="badge bg-success">Aktif</span>
+                      </td>
+                      <td class="fw-semibold">{{ statistics.activeProducts }}</td>
+                      <td>{{ getPercentage(statistics.activeProducts) }}%</td>
+                      <td>
+                        <div class="progress" style="height: 8px;">
+                          <div class="progress-bar bg-success" 
+                               [style.width.%]="getPercentage(statistics.activeProducts)"></div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="badge bg-warning">Menipis</span>
+                      </td>
+                      <td class="fw-semibold">{{ statistics.lowStock }}</td>
+                      <td>{{ getPercentage(statistics.lowStock) }}%</td>
+                      <td>
+                        <div class="progress" style="height: 8px;">
+                          <div class="progress-bar bg-warning" 
+                               [style.width.%]="getPercentage(statistics.lowStock)"></div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="badge bg-secondary">Nonaktif</span>
+                      </td>
+                      <td class="fw-semibold">{{ statistics.outOfStock }}</td>
+                      <td>{{ getPercentage(statistics.outOfStock) }}%</td>
+                      <td>
+                        <div class="progress" style="height: 8px;">
+                          <div class="progress-bar bg-secondary" 
+                               [style.width.%]="getPercentage(statistics.outOfStock)"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

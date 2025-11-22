@@ -12,6 +12,7 @@ import { UserProfileComponent } from './user/user-profile/user-profile.component
 import { SettingsComponent } from './shared/settings/settings.component';
 import { LoginComponent } from './auth/login/login.component';
 import { CategoryManagementComponent } from './admin/category-management/category-management.component';
+import { StatisticsComponent } from './admin/statistics/statistics.component';
 
 
 
@@ -28,12 +29,13 @@ export const routes: Routes = [
         { path: 'product-list', component: ProductListComponent },
         { path: 'user-management', component: UserManagementComponent },
         { path: 'profile', component: AdminProfileComponent },
+        { path: 'category-management', component: CategoryManagementComponent },
+        { path: 'statistics', component: StatisticsComponent },
         { 
           path: 'settings', 
           component: SettingsComponent,
           data: { isAdmin: true }
         },
-        { path: 'category-management', component: CategoryManagementComponent },
         { path: '', redirectTo: 'admin-dashboard', pathMatch: 'full' }
         ]
     },
