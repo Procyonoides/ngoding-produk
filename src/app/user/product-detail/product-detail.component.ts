@@ -178,4 +178,19 @@ export class ProductDetailComponent implements OnInit{
     return rating % 1 >= 0.5;
   }
 
+  getStarFillList(): number[] {
+    const rating = this.product?.rating || 0;
+    const fills: number[] = [];
+
+    for (let i = 0; i < 5; i++) {
+      const value = rating - i;
+
+      if (value >= 1) fills.push(100);
+      else if (value <= 0) fills.push(0);
+      else fills.push(Math.round(value * 100)); // bisa 10%, 25%, 80%, dll
+    }
+
+    return fills;
+  }
+
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +13,10 @@ export class AuthService {
   private usernameKey = 'username';
   private nameKey = 'name';
   private userIdKey = 'userid';
+
+  // ✅ BehaviorSubject untuk live update nama
+  private userNameSubject = new BehaviorSubject<string>(this.getName() || 'User');
+  public userName$ = this.userNameSubject.asObservable();
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -41,6 +45,16 @@ export class AuthService {
     );
   }
 
+  // ✅ UPDATE USER NAME (dipanggil setelah edit profile)
+  updateUserName(newName: string): void {
+    if (this.isBrowser()) {
+      localStorage.setItem(this.nameKey, newName);
+      // ✅ Update observable untuk live update navbar
+      this.userNameSubject.next(newName);
+      console.log('✅ User name updated in navbar:', newName);
+    }
+  }
+
   logout(): void {
     if (this.isBrowser()) {
       localStorage.removeItem(this.tokenKey);
@@ -48,6 +62,8 @@ export class AuthService {
       localStorage.removeItem(this.usernameKey);
       localStorage.removeItem(this.nameKey);
       
+      // ✅ Reset observable
+      this.userNameSubject.next('User');
       // ✅ Redirect ke login
       this.router.navigate(['/login']);
     }
@@ -72,6 +88,11 @@ export class AuthService {
 
   getUserId(): string | null {
     return this.isBrowser() ? localStorage.getItem(this.userIdKey) : null;
+  }
+
+  // ✅ Get observable untuk subscribe
+  getUserName$(): Observable<string> {
+    return this.userName$;
   }
 
   // ✅ Check login status

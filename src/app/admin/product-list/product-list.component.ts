@@ -42,7 +42,7 @@ export class ProductListComponent implements OnInit {
   sortBy = 'name';
   sortOrder = 'asc';
   
-  categories = ['Semua Kategori', 'Meja', 'Kursi', 'Lemari', 'Rak', 'Bufet', 'Tempat Tidur'];
+  categories: string[] = ['Semua Kategori'];
   statuses = ['Semua Status', 'Aktif', 'Menipis', 'Nonaktif'];
   units = ['Unit', 'Set', 'Pcs'];
   
@@ -70,6 +70,7 @@ export class ProductListComponent implements OnInit {
     this.username = this.authService.getUsername() || '';
     this.role = this.authService.getRole() || '';
     this.loadProducts();
+    this.loadCategories();
   }
 
   // ✅ Tambahkan method dropdown
@@ -111,6 +112,14 @@ export class ProductListComponent implements OnInit {
         console.error('❌ Error loading products:', err);
         this.errorMessage = 'Gagal memuat produk';
         this.loading = false;
+      }
+    });
+  }
+
+  loadCategories(): void {
+    this.http.get<any[]>('http://localhost:5000/api/categories').subscribe({
+      next: (res) => {
+        this.categories = ['Semua Kategori', ...res.map(c => c.name)];
       }
     });
   }

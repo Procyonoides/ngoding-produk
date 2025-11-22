@@ -66,23 +66,111 @@ export class UserProfileComponent implements OnInit {
       this.loadProfile(); // Reset jika cancel
     }
     this.errorMessage = '';
+    this.successMessage = '';
   }
 
   saveProfile(): void {
+    // ✅ Validasi input
+    if (!this.profile.name || !this.profile.username || !this.profile.email || !this.profile.phone) {
+      this.errorMessage = 'Semua field wajib diisi!';
+      return;
+    }
+
+    // ✅ Validasi email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.profile.email)) {
+      this.errorMessage = 'Format email tidak valid!';
+      return;
+    }
+
+    // ✅ Validasi nomor telepon (Indonesia)
+    const phoneRegex = /^(\+62|62|0)[0-9]{9,12}$/;
+    if (!phoneRegex.test(this.profile.phone)) {
+      this.errorMessage = 'Format nomor telepon tidak valid! (Contoh: 0812345678 atau +6281234567890)';
+      return;
+    }
+
     this.loadingProfile = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    // TODO: Implement API call to update profile
-    setTimeout(() => {
-      this.successMessage = 'Profile berhasil diupdate!';
+    // ✅ Get userId dari auth service
+    const userId = this.authService.getUserId();
+    
+    if (!userId) {
+      this.errorMessage = 'User ID tidak ditemukan!';
       this.loadingProfile = false;
-      this.isEditing = false;
-      
-      setTimeout(() => {
-        this.successMessage = '';
-      }, 3000);
-    }, 1000);
+      return;
+    }
+
+    console.log("📝 Updating profile:", {
+      userId,
+      name: this.profile.name,
+      username: this.profile.username,
+      email: this.profile.email,
+      phone: this.profile.phone
+    });
+
+    // ✅ Prepare payload (gunakan 'name')
+    const payload = {
+      name: this.profile.name.trim(),
+      username: this.profile.username.trim(),
+      email: this.profile.email.trim().toLowerCase(),
+      phone: this.profile.phone.trim()
+    };
+
+    // ✅ PERBAIKAN: Endpoint yang benar adalah /api/auth/users/:userId
+    this.http.put(`http://localhost:5000/api/auth/users/${userId}`, payload).subscribe({
+      next: (res: any) => {
+        console.log('✅ Update profile response:', res);
+        
+        // ✅ Update localStorage dengan data baru
+        localStorage.setItem('name', this.profile.name);
+        localStorage.setItem('username', this.profile.username);
+
+        // ✅ LIVE UPDATE: Notify auth service untuk update navbar
+        this.authService.updateUserName(this.profile.name);
+
+        this.successMessage = '✅ Profile berhasil diupdate!';
+        this.loadingProfile = false;
+        this.isEditing = false;
+
+        // ✅ Auto-hide success message
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 4000);
+      },
+      error: (err) => {
+        console.error('❌ Update profile error:', err);
+        this.loadingProfile = false;
+
+        // ✅ Display error message dari backend
+        let errorMsg = 'Gagal update profile. Silakan coba lagi.';
+
+        if (err.error?.message) {
+          errorMsg = err.error.message;
+        } else if (err.status === 400) {
+          errorMsg = 'Data tidak valid!';
+        } else if (err.status === 403) {
+          errorMsg = 'Anda tidak memiliki akses untuk mengubah profile ini!';
+        } else if (err.status === 404) {
+          errorMsg = 'User tidak ditemukan!';
+        } else if (err.status === 409) {
+          errorMsg = err.error?.message || 'Username atau email sudah digunakan!';
+        } else if (err.status === 500) {
+          errorMsg = 'Server error. Silakan coba lagi nanti.';
+        }
+
+        this.errorMessage = errorMsg;
+
+        // ✅ Auto-hide error message
+        setTimeout(() => {
+          if (this.errorMessage === errorMsg) {
+            this.errorMessage = '';
+          }
+        }, 5000);
+      }
+    });
   }
 
   // ✅ Change Password

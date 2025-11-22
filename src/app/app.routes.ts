@@ -11,6 +11,8 @@ import { ProductDetailComponent } from './user/product-detail/product-detail.com
 import { UserProfileComponent } from './user/user-profile/user-profile.component';
 import { SettingsComponent } from './shared/settings/settings.component';
 import { LoginComponent } from './auth/login/login.component';
+import { CategoryManagementComponent } from './admin/category-management/category-management.component';
+
 
 
 export const routes: Routes = [
@@ -31,6 +33,7 @@ export const routes: Routes = [
           component: SettingsComponent,
           data: { isAdmin: true }
         },
+        { path: 'category-management', component: CategoryManagementComponent },
         { path: '', redirectTo: 'admin-dashboard', pathMatch: 'full' }
         ]
     },

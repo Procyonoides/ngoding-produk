@@ -1,7 +1,8 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -10,7 +11,7 @@ import { AuthService } from '../../auth/auth.service';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   @Input() isAdmin: boolean = false;
   @Input() transparent: boolean = false;
   
@@ -19,6 +20,9 @@ export class NavbarComponent implements OnInit {
   role = '';
   showDropdown = false;
   showMobileMenu = false;
+
+  // ✅ Subscription untuk live update
+  private userNameSubscription: Subscription | null = null;
 
   constructor(
     private authService: AuthService,
@@ -29,6 +33,22 @@ export class NavbarComponent implements OnInit {
     this.username = this.authService.getUsername() || '';
     this.name = this.authService.getName() || 'User';
     this.role = this.authService.getRole() || '';
+
+    // ✅ LIVE UPDATE: Subscribe ke userName$ observable
+    this.userNameSubscription = this.authService.getUserName$().subscribe(
+      (newName: string) => {
+        console.log('🔄 Navbar: User name updated from service:', newName);
+        this.name = newName;
+      }
+    );
+  }
+
+  // ✅ Cleanup subscription saat component destroy
+  ngOnDestroy(): void {
+    if (this.userNameSubscription) {
+      this.userNameSubscription.unsubscribe();
+      console.log('🧹 Navbar: userName$ subscription cleaned up');
+    }
   }
 
   toggleMobileMenu(): void {
@@ -65,6 +85,13 @@ export class NavbarComponent implements OnInit {
     this.closeDropdown();
     if (this.isAdmin) {
       this.router.navigate(['/admin/user-management']);
+    }
+  }
+
+  goToCategory(): void {
+    this.closeDropdown();
+    if (!this.isAdmin) {
+      this.router.navigate(['/admin/category-management']);
     }
   }
 

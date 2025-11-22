@@ -40,7 +40,7 @@
           <img *ngFor="let img of imageGallery" 
                [src]="img" 
                class="img-thumbnail cursor-pointer" 
-               style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
+               style="width: 80px; height: 80px; object-fit: cover;"
                [class.border-primary]="img === selectedImage"
                (click)="selectImage(img)"
                alt="Thumbnail">
@@ -52,18 +52,20 @@
         <div class="mb-3">
           <h2 class="fw-bold mb-2">{{ product.name }}</h2>
           
-          <!-- Rating & Sold -->
-          <div class="d-flex align-items-center gap-3 mb-3">
-            <div class="d-flex align-items-center">
-              <span class="text-warning me-1">
-                <i *ngFor="let star of getStarArray()" 
-                   [class]="star === 1 ? 'bi bi-star-fill' : 'bi bi-star'"></i>
-                <i *ngIf="getHalfStar()" class="bi bi-star-half"></i>
-              </span>
-              <span class="fw-bold me-1">{{ product.rating || 0 }}</span>
-              <span class="text-muted small">({{ product.sold || 0 }} Terjual)</span>
+            <!-- ✅ FIX: Rating & Sold (Proper Alignment) -->
+            <div class="star-rating">
+                <ng-container *ngFor="let fill of getStarFillList()">
+                    <div class="star-wrapper">
+                    <i class="bi bi-star"></i>
+
+                    <!-- Layer isi -->
+                    <i class="bi bi-star-fill star-fill" [style.width.%]="fill"></i>
+                    </div>
+                </ng-container>
+
+                <span class="fw-bold ms-1">{{ product.rating }}</span>
+                <span class="text-muted small">({{ product.sold }} Terjual)</span>
             </div>
-          </div>
 
           <!-- Price -->
           <div class="mb-3">
@@ -82,26 +84,36 @@
             </div>
           </div>
 
-          <!-- Quantity & Stock -->
-          <div class="mb-3">
+          <!-- ✅ FIX: Quantity & Stock (Proper Alignment) -->
+          <div class="mb-3 quantity-section">
             <label class="form-label fw-semibold">Kuantitas</label>
-            <div class="d-flex align-items-center gap-3">
+            <div class="quantity-controls">
+              <!-- Input Group -->
               <div class="input-group" style="max-width: 150px;">
-                <button class="btn btn-outline-secondary" type="button" 
-                        (click)="decreaseQuantity()" [disabled]="quantity <= 1">
+                <button class="btn btn-outline-secondary" 
+                        type="button" 
+                        (click)="decreaseQuantity()" 
+                        [disabled]="quantity <= 1">
                   <i class="bi bi-dash"></i>
                 </button>
-                <input type="text" class="form-control text-center" 
-                       [value]="quantity" readonly>
-                <button class="btn btn-outline-secondary" type="button" 
+                <input type="text" 
+                       class="form-control text-center" 
+                       [value]="quantity" 
+                       readonly>
+                <button class="btn btn-outline-secondary" 
+                        type="button" 
                         (click)="increaseQuantity()" 
                         [disabled]="!isInStock() || quantity >= product.stock">
                   <i class="bi bi-plus"></i>
                 </button>
               </div>
+
+              <!-- Stock Status Badge -->
               <span class="fw-semibold" [ngClass]="getStockClass()">
                 {{ getStockStatus() }}
               </span>
+
+              <!-- Available Stock Info -->
               <span class="text-muted small" *ngIf="isInStock()">
                 Stok: {{ product.stock }} {{ product.unit }}
               </span>

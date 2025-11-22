@@ -1,0 +1,223 @@
+<!-- Navbar -->
+<app-navbar [isAdmin]="true"></app-navbar>
+
+<div class="container-fluid p-4 bg-white min-vh-100">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h5 class="fw-bold mb-1">Manajemen Kategori</h5>
+      <p class="text-muted mb-0">Kelola kategori produk furniture.</p>
+    </div>
+    <button class="btn btn-warning text-white fw-semibold" (click)="openAddModal()">
+      <i class="bi bi-plus-lg me-1"></i> Tambah Kategori
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show">
+    <i class="bi bi-check-circle me-2"></i>
+    {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show">
+    <i class="bi bi-exclamation-circle me-2"></i>
+    {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+  </div>
+
+  <!-- Search -->
+  <div class="mb-3">
+    <div class="position-relative">
+      <i class="bi bi-search position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: #6c757d;"></i>
+      <input type="text" 
+             class="form-control ps-4" 
+             placeholder="Cari kategori..." 
+             [(ngModel)]="searchQuery" 
+             (ngModelChange)="onSearchChange()">
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Categories Table -->
+  <div class="table-responsive shadow-sm rounded-3" *ngIf="!loading">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Nama Kategori</th>
+          <th>Deskripsi</th>
+          <th>Jumlah Produk</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let category of filteredCategories">
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <!-- ✅ FIX: Proper icon binding -->
+              <i [ngClass]="'bi ' + category.icon" 
+                 [style.fontSize.rem]="1.25"
+                 [style.color]="category.color"></i>
+              <strong>{{ category.name | titlecase }}</strong>
+            </div>
+          </td>
+          <td>{{ category.description || '-' }}</td>
+          <td>
+            <span class="badge bg-info">{{ category.productCount }} produk</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="category.isActive ? 'bg-success' : 'bg-secondary'">
+              {{ category.isActive ? 'Aktif' : 'Nonaktif' }}
+            </span>
+          </td>
+          <td>
+            <div class="dropdown-custom position-relative">
+              <button class="btn btn-sm btn-light" (click)="toggleDropdown(category._id!)">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <div class="dropdown-menu-custom" [class.show]="openDropdownId === category._id" 
+                   *ngIf="openDropdownId === category._id">
+                <a class="dropdown-item-custom" (click)="openEditModal(category)">
+                  <i class="bi bi-pencil me-2"></i> Edit
+                </a>
+                <a class="dropdown-item-custom text-danger" 
+                   (click)="openDeleteModal(category)"
+                   [class.disabled]="category.productCount > 0"
+                   [style.opacity]="category.productCount > 0 ? '0.5' : '1'"
+                   [style.cursor]="category.productCount > 0 ? 'not-allowed' : 'pointer'">
+                  <i class="bi bi-trash me-2"></i> Hapus
+                </a>
+              </div>
+            </div>
+            <div class="dropdown-overlay" *ngIf="openDropdownId === category._id" (click)="closeDropdown()"></div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredCategories.length === 0">
+          <td colspan="5" class="text-center py-4 text-muted">
+            Tidak ada kategori yang ditemukan
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== MODAL TAMBAH/EDIT KATEGORI ========== -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ isEditMode ? 'Edit Kategori' : 'Tambah Kategori' }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="saveCategory()">
+          <!-- Nama -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nama Kategori <span class="text-danger">*</span></label>
+            <input type="text" 
+                   class="form-control" 
+                   [(ngModel)]="categoryForm.name" 
+                   name="name" 
+                   placeholder="Contoh: Meja Makan" 
+                   required>
+          </div>
+
+          <!-- Deskripsi -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Deskripsi</label>
+            <textarea class="form-control" 
+                      rows="3" 
+                      [(ngModel)]="categoryForm.description" 
+                      name="description" 
+                      placeholder="Deskripsi kategori (opsional)"></textarea>
+          </div>
+
+          <!-- Icon -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Icon</label>
+            <select class="form-select" [(ngModel)]="categoryForm.icon" name="icon">
+              <option *ngFor="let icon of icons" [value]="icon">
+                {{ icon }}
+              </option>
+            </select>
+            <!-- ✅ FIX: Preview icon -->
+            <small class="text-muted d-block mt-2">
+              Preview: 
+              <i [ngClass]="'bi ' + categoryForm.icon" 
+                 [style.fontSize.rem]="1.5"></i>
+            </small>
+          </div>
+
+          <!-- Warna -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Warna</label>
+            <div class="d-flex align-items-center gap-2">
+              <input type="color" 
+                     class="form-control" 
+                     style="width: 60px; height: 40px;" 
+                     [(ngModel)]="categoryForm.color" 
+                     name="color">
+              <span class="fw-semibold">{{ categoryForm.color }}</span>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" 
+                     type="checkbox" 
+                     [checked]="categoryForm.isActive"
+                     (change)="categoryForm.isActive = !categoryForm.isActive"
+                     id="statusToggle">
+              <label class="form-check-label" for="statusToggle">
+                Status: <strong>{{ categoryForm.isActive ? 'Aktif' : 'Nonaktif' }}</strong>
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-warning text-white" [disabled]="loading">
+              {{ isEditMode ? 'Update' : 'Tambah' }} ✓
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL DELETE KATEGORI ========== -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle"></i> Hapus Kategori
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedCategory">
+        <p>Apakah Anda yakin ingin menghapus kategori ini?</p>
+        <div class="alert alert-warning">
+          <strong>{{ selectedCategory.name | titlecase }}</strong>
+          <small class="d-block mt-2">*Kategori tanpa produk baru bisa dihapus</small>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-danger" (click)="deleteCategory()" [disabled]="loading">
+          {{ loading ? 'Menghapus...' : 'Ya, Hapus' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
