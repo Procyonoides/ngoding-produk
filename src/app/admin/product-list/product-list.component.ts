@@ -20,6 +20,7 @@ interface Product {
   imageUrl: string;
   rating?: number;
   sold?: number;
+  selected?: boolean;
 }
 
 @Component({
@@ -59,6 +60,7 @@ export class ProductListComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   openDropdownId: string | null = null;
+  selectedForDelete: string[] = [];
 
   constructor(
     private authService: AuthService,
@@ -71,6 +73,94 @@ export class ProductListComponent implements OnInit {
     this.role = this.authService.getRole() || '';
     this.loadProducts();
     this.loadCategories();
+  }
+
+  // ✅ Toggle checkbox untuk delete permanen
+  toggleSelectForDelete(productId: string): void {
+    const index = this.selectedForDelete.indexOf(productId);
+    if (index > -1) {
+      this.selectedForDelete.splice(index, 1);
+    } else {
+      this.selectedForDelete.push(productId);
+    }
+  }
+
+  // ✅ Check if product is selected
+  isProductSelected(productId: string | undefined): boolean {
+    return productId ? this.selectedForDelete.includes(productId) : false;
+  }
+
+  // ✅ Select/Deselect all
+  toggleSelectAll(): void {
+    if (this.selectedForDelete.length === this.filteredProducts.length) {
+      // Deselect all
+      this.selectedForDelete = [];
+    } else {
+      // Select all
+      this.selectedForDelete = this.filteredProducts.map(p => p._id!).filter(id => id);
+    }
+  }
+
+  // ✅ Delete selected products permanently
+  deleteSelectedPermanently(): void {
+    if (this.selectedForDelete.length === 0) {
+      alert('Pilih minimal 1 produk untuk dihapus');
+      return;
+    }
+
+    const confirmDelete = confirm(
+      `Yakin ingin menghapus ${this.selectedForDelete.length} produk secara PERMANEN? Tindakan ini tidak dapat dibatalkan.`
+    );
+
+    if (!confirmDelete) return;
+
+    this.loading = true;
+
+    // Delete semua produk yang dipilih
+    const deletePromises = this.selectedForDelete.map(productId =>
+      this.http.delete(`http://localhost:5000/api/products/${productId}/hard`).toPromise()
+    );
+
+    Promise.all(deletePromises)
+      .then(() => {
+        this.successMessage = `${this.selectedForDelete.length} produk berhasil dihapus permanen!`;
+        
+        // ✅ Remove dari list tanpa reload
+        this.products = this.products.filter(p => !this.selectedForDelete.includes(p._id!));
+        this.applyFilters();
+        
+        // Clear selection
+        this.selectedForDelete = [];
+        this.loading = false;
+
+        // Close modal
+        const modal = document.getElementById('deletePermanentModal');
+        if (modal) {
+          const modalInstance = bootstrap.Modal.getInstance(modal);
+          if (modalInstance) {
+            modalInstance.hide();
+          }
+        }
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(el => el.remove());
+
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
+      })
+      .catch((err) => {
+        console.error('❌ Error deleting products:', err);
+        this.errorMessage = 'Gagal menghapus produk';
+        this.loading = false;
+      });
+  }
+
+  // ✅ Open delete permanent modal
+  openDeletePermanentModal(): void {
+    this.selectedForDelete = [];
+    this.errorMessage = '';
+    const modal = new bootstrap.Modal(document.getElementById('deletePermanentModal'));
+    modal.show();
   }
 
   // ✅ Tambahkan method dropdown

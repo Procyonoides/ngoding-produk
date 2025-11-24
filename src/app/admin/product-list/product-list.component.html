@@ -42,8 +42,8 @@
     </select>
 
     <div class="ms-auto d-flex gap-2">
-      <button class="btn btn-outline-secondary" (click)="openStockModal(filteredProducts[0])">
-        Perbarui Stok Produk
+      <button class="btn btn-outline-danger" (click)="openDeletePermanentModal()">
+        <i class="bi bi-trash me-1"></i> Hapus Produk Permanen
       </button>
       <button class="btn text-white" style="background-color: #ff7b00;" (click)="openAddModal()">
         + Tambah Produk
@@ -454,6 +454,86 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
         <button type="button" class="btn btn-danger" (click)="deleteProduct()" [disabled]="loading">
           {{ loading ? 'Menghapus...' : 'Ya, Hapus' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL DELETE PERMANEN ========== -->
+<div class="modal fade" id="deletePermanentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header border-danger border-bottom-2">
+        <h5 class="modal-title text-danger fw-bold">
+          <i class="bi bi-trash me-2"></i> Hapus Produk Secara Permanen
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="alert alert-danger mb-4">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <strong>Peringatan!</strong> Produk yang dihapus tidak dapat dipulihkan kembali.
+        </div>
+
+        <!-- Select All Checkbox -->
+        <div class="mb-3">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="selectAllCheck"
+                   [checked]="selectedForDelete.length === filteredProducts.length && filteredProducts.length > 0"
+                   (change)="toggleSelectAll()">
+            <label class="form-check-label fw-semibold" for="selectAllCheck">
+              Pilih Semua ({{ filteredProducts.length }} produk)
+            </label>
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- List Produk -->
+        <div style="max-height: 400px; overflow-y: auto; overflow-x: hidden;">
+          <div *ngIf="filteredProducts.length === 0" class="text-center text-muted py-5">
+            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+            <p class="mt-2">Tidak ada produk</p>
+          </div>
+
+          <div *ngFor="let product of filteredProducts" class="mb-2 p-3 border rounded" style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+            <input type="checkbox" class="form-check-input flex-shrink-0" [id]="'product-' + product._id"
+                   [checked]="isProductSelected(product._id)"
+                   (change)="toggleSelectForDelete(product._id!)"
+                   style="margin: 0; cursor: pointer;">
+            <label class="flex-grow-1" [for]="'product-' + product._id" style="cursor: pointer; margin: 0; min-width: 0;">
+              <div class="d-flex align-items-center justify-content-between" style="gap: 12px; min-width: 0;">
+                <div class="d-flex align-items-center" style="gap: 10px; min-width: 0;">
+                  <img [src]="product.imageUrl || 'https://via.placeholder.com/40'" 
+                       style="width: 40px; height: 40px; min-width: 40px; object-fit: cover; border-radius: 4px; flex-shrink: 0;" />
+                  <div style="min-width: 0; overflow: hidden;">
+                    <strong style="display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ product.name }}</strong>
+                    <small class="text-muted" style="display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ product.category }} • Rp {{ product.price | number:'1.0-0' }}</small>
+                  </div>
+                </div>
+                <span class="badge bg-secondary flex-shrink-0">{{ product.stock }} {{ product.unit }}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <hr class="mt-3">
+
+        <!-- Summary -->
+        <div class="alert alert-light">
+          <strong>{{ selectedForDelete.length }}</strong> produk dipilih untuk dihapus
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-danger" 
+                (click)="deleteSelectedPermanently()"
+                [disabled]="loading || selectedForDelete.length === 0">
+          <i class="bi bi-trash me-2"></i>
+          {{ loading ? 'Menghapus...' : 'Hapus ' + selectedForDelete.length + ' Produk' }}
         </button>
       </div>
     </div>

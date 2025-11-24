@@ -56,4 +56,10 @@ export class AdminDashboardComponent implements OnInit {
     this.router.navigate([`/admin/${path}`]);
   }
 
+  // ✅ LAPORAN - Navigate to reports
+  viewReport() {
+    console.log('📊 Navigating to reports...');
+    this.router.navigate(['/admin/reports']);
+  }
+
 }

@@ -21,7 +21,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   showDropdown = false;
   showMobileMenu = false;
 
-  // ✅ Subscription untuk live update
+  // ✅ Subscriptions
   private userNameSubscription: Subscription | null = null;
 
   constructor(
@@ -30,20 +30,39 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.username = this.authService.getUsername() || '';
-    this.name = this.authService.getName() || 'User';
-    this.role = this.authService.getRole() || '';
-
-    // ✅ LIVE UPDATE: Subscribe ke userName$ observable
+    // ✅ PERBAIKAN: Load data dari auth service dengan benar
+    this.loadUserData();
+    
+    // ✅ Subscribe ke real-time updates
     this.userNameSubscription = this.authService.getUserName$().subscribe(
       (newName: string) => {
-        console.log('🔄 Navbar: User name updated from service:', newName);
-        this.name = newName;
+        console.log('🔄 Navbar received name update:', newName);
+        this.name = newName || 'User';
       }
     );
   }
 
-  // ✅ Cleanup subscription saat component destroy
+  // ✅ Load user data dengan fallback yang aman
+  private loadUserData(): void {
+    const name = this.authService.getName();
+    const username = this.authService.getUsername();
+    const role = this.authService.getRole();
+    
+    console.log('👤 Loading user data:', { name, username, role });
+    
+    // ✅ Set name - prioritas: stored name > username > fallback
+    this.name = (name && name.trim()) ? name : (username && username.trim()) ? username : 'User';
+    
+    // ✅ Set username
+    this.username = username || '';
+    
+    // ✅ Set role
+    this.role = role || '';
+    
+    console.log('✅ User data loaded - Name:', this.name, '| Role:', this.role);
+  }
+
+  // ✅ Cleanup subscription
   ngOnDestroy(): void {
     if (this.userNameSubscription) {
       this.userNameSubscription.unsubscribe();
@@ -67,44 +86,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showDropdown = false;
   }
 
-  goToDashboard(): void {
-    this.closeDropdown();
-    if (this.isAdmin) {
-      this.router.navigate(['/admin/admin-dashboard']);
-    }
-  }
-
-  goToProductList(): void {
-    this.closeDropdown();
-    if (this.isAdmin) {
-      this.router.navigate(['/admin/product-list']);
-    }
-  }
-
-  goToUserManagement(): void {
-    this.closeDropdown();
-    if (this.isAdmin) {
-      this.router.navigate(['/admin/user-management']);
-    }
-  }
-
-  goToCategory(): void {
-    this.closeDropdown();
-    if (!this.isAdmin) {
-      this.router.navigate(['/admin/category-management']);
-    }
-  }
-
-  goToUserView(): void {
-    this.closeDropdown();
-    if (!this.isAdmin) {
-      this.router.navigate(['/user/user-view']);
-    }
-  }
-
   goToProfile(): void {
     this.closeDropdown();
-    // Navigate to profile page (akan dibuat nanti)
     if (this.isAdmin) {
       this.router.navigate(['/admin/profile']);
     } else {
@@ -114,7 +97,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   goToSettings(): void {
     this.closeDropdown();
-    // Navigate to settings page (akan dibuat nanti)
     if (this.isAdmin) {
       this.router.navigate(['/admin/settings']);
     } else {
@@ -124,7 +106,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.closeDropdown();
-    // Confirm logout
     if (confirm('Apakah Anda yakin ingin logout?')) {
       this.authService.logout();
       this.router.navigate(['/login']);

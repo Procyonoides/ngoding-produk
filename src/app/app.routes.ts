@@ -13,6 +13,7 @@ import { SettingsComponent } from './shared/settings/settings.component';
 import { LoginComponent } from './auth/login/login.component';
 import { CategoryManagementComponent } from './admin/category-management/category-management.component';
 import { StatisticsComponent } from './admin/statistics/statistics.component';
+import { ReportsComponent } from './admin/reports/reports.component';
 
 
 
@@ -31,6 +32,7 @@ export const routes: Routes = [
         { path: 'profile', component: AdminProfileComponent },
         { path: 'category-management', component: CategoryManagementComponent },
         { path: 'statistics', component: StatisticsComponent },
+        { path: 'reports', component: ReportsComponent},
         { 
           path: 'settings', 
           component: SettingsComponent,
