@@ -44,12 +44,12 @@ export class CategoryManagementComponent implements OnInit {
   icons = [
     'bi-box-seam',
     'bi-table',
-    'bi-chair',
-    'bi-cabinet',
+    'bi-subtract',
+    'bi-x-diamond',
     'bi-grid-1x2',
     'bi-boxes',
-    'bi-bed',
-    'bi-sofa'
+    'bi-tablet-landscape',
+    'bi-palette2'
   ];
 
   constructor(
